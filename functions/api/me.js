@@ -1,7 +1,9 @@
 export async function onRequestGet({ request }) {
   try {
     const cookieHeader = request.headers.get('Cookie') || '';
-    const match = cookieHeader.match(/devbot_session=([^;]+)/);
+    
+    // devbot_session 쿠키 추출
+    const match = cookieHeader.match(/(?:^|;\s*)devbot_session=([^;]+)/);
 
     if (!match || !match[1]) {
       return new Response(JSON.stringify({ user: null }), {
