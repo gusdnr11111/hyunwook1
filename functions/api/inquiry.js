@@ -1,28 +1,29 @@
 export async function onRequestPost({ request, env }) {
   try {
-    // 1. 쿠키에서 세션 추출 (devbot_session)
-    const cookieHeader = request.headers.get('Cookie') || '';
-    const match = cookieHeader.match(/(?:^|;\s*)devbot_session=([^;]+)/);
+    const { category, content, budget, user: bodyUser } = await request.json();
 
-    if (!match || !match[1]) {
-      return new Response(JSON.stringify({ error: '로그인 세션이 만료되었습니다. 다시 로그인해 주세요.' }), {
+    // 1. 유저 정보 확인 (본문 전달 유저 우선, 차선으로 쿠키 확인)
+    let user = bodyUser;
+    if (!user) {
+      const cookieHeader = request.headers.get('Cookie') || '';
+      const match = cookieHeader.match(/(?:^|;\s*)devbot_session=([^;]+)/);
+      if (match && match[1]) {
+        try {
+          user = JSON.parse(decodeURIComponent(escape(atob(match[1]))));
+        } catch (e) {
+          try {
+            user = JSON.parse(decodeURIComponent(match[1]));
+          } catch (e2) {}
+        }
+      }
+    }
+
+    if (!user || !user.id) {
+      return new Response(JSON.stringify({ error: '로그인 세션 정보가 없습니다. 다시 로그인해 주세요.' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
       });
     }
-
-    let user = null;
-    try {
-      user = JSON.parse(decodeURIComponent(match[1]));
-    } catch (e) {
-      return new Response(JSON.stringify({ error: '세션 정보가 유효하지 않습니다.' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    // 2. 요청 본문 파싱
-    const { category, content, budget } = await request.json();
 
     if (!content || !content.trim()) {
       return new Response(JSON.stringify({ error: '문의 내용을 입력해 주세요.' }), {
@@ -31,7 +32,7 @@ export async function onRequestPost({ request, env }) {
       });
     }
 
-    // 3. D1 데이터베이스 저장 (DB 바인딩이 되어 있는 경우)
+    // 2. D1 데이터베이스 저장
     if (env.DB) {
       try {
         await env.DB.prepare(
@@ -46,11 +47,11 @@ export async function onRequestPost({ request, env }) {
           new Date().toISOString()
         ).run();
       } catch (dbErr) {
-        console.error('DB 저장 실패(계속 진행):', dbErr);
+        console.error('DB 저장 실패:', dbErr);
       }
     }
 
-    // 4. 디스코드 채널로 봇을 통해 임베드 메시지 전송
+    // 3. 디스코드 채널로 봇을 통해 임베드 전송
     const channelId = env.DISCORD_CHANNEL_ID ? String(env.DISCORD_CHANNEL_ID).trim() : '1550831898505253014';
     const botToken = env.DISCORD_BOT_TOKEN ? env.DISCORD_BOT_TOKEN.trim() : '';
 
@@ -105,7 +106,6 @@ export async function onRequestPost({ request, env }) {
 
     if (!discordRes.ok) {
       const errDetail = await discordRes.text();
-      console.error('Discord API 에러:', errDetail);
       return new Response(JSON.stringify({ error: `디스코드 채널 전송 실패: ${errDetail}` }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
