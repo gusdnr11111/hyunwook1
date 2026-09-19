@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('tk');
 
-  // 1. 디스코드 콜백에서 토큰이 넘어왔을 때 즉시 로컬 저장
+  // 1. 디스코드 콜백 토큰 수신 처리
   if (token) {
     try {
       currentUser = JSON.parse(decodeURIComponent(escape(atob(token))));
@@ -257,14 +257,14 @@ document.addEventListener('DOMContentLoaded', () => {
       window.history.replaceState({}, document.title, window.location.pathname);
     } catch (e) {}
   } else {
-    // 2. 이미 로그인된 상태인지 확인
+    // 2. 기존 로컬 세션 확인
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try { currentUser = JSON.parse(saved); } catch (e) {}
     }
   }
 
-  // 3. UI 그리기
+  // 3. UI 바인딩
   if (currentUser) {
     renderUserUI(currentUser);
     if (urlParams.get('login') === 'success') {
@@ -274,14 +274,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// UI 그리기
 function renderUserUI(user) {
   const displayName = user.global_name || user.username;
   const avatarUrl = user.avatar
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
     : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
-  // 상단 네비바 (클릭 시 로그아웃 토글)
+  // 상단 네비바 UI
   document.getElementById('navAuthArea').innerHTML = `
     <div class="relative">
       <button onclick="document.getElementById('logoutDropdown').classList.toggle('hidden')" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700">
@@ -297,7 +296,7 @@ function renderUserUI(user) {
     </div>
   `;
 
-  // 문의 섹션 오픈
+  // 문의 섹션 폼 활성화
   document.getElementById('loginSection').classList.add('hidden');
   document.getElementById('userSection').classList.remove('hidden');
 
@@ -325,7 +324,7 @@ function prefillInquiry(title) {
   }
 }
 
-// 문의 전송
+// 문의 전송 (currentUser 객체 함께 전송)
 async function submitInquiry() {
   if (!currentUser) {
     alert('로그인이 필요합니다.');
@@ -350,7 +349,12 @@ async function submitInquiry() {
     const res = await fetch('/api/inquiry', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ category, content, budget: budget || '협의/미정' })
+      body: JSON.stringify({ 
+        category, 
+        content, 
+        budget: budget || '협의/미정',
+        user: currentUser
+      })
     });
     const data = await res.json();
 
