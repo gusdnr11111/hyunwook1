@@ -3,7 +3,7 @@ export async function onRequestPost({ request, env }) {
     const { category, content, budget, user } = await request.json();
 
     if (!user || !user.id) {
-      return new Response(JSON.stringify({ error: '로그인 정보가 없습니다.' }), {
+      return new Response(JSON.stringify({ error: '로그인 정보가 누락되었습니다.' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -16,26 +16,34 @@ export async function onRequestPost({ request, env }) {
       });
     }
 
-    const now = new Date().toISOString();
+    // 1. D1 데이터베이스 저장 (바인딩된 env.DB가 없으면 에러 반환)
+    if (!env.DB) {
+      return new Response(JSON.stringify({ error: 'Cloudflare Pages 설정에 D1(DB) 바인딩이 누락되었습니다.' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
-    // 1. D1 DB 저장 (어드민 패널 조회용)
-    if (env.DB) {
-      try {
-        await env.DB.prepare(
-          `INSERT INTO inquiries (user_id, username, global_name, category, content, budget, status, created_at) 
-           VALUES (?, ?, ?, ?, ?, ?, '대기중', ?)`
-        ).bind(
-          String(user.id),
-          String(user.username || ''),
-          String(user.global_name || user.username || ''),
-          String(category || '기타'),
-          String(content),
-          String(budget || '미정/협의'),
-          now
-        ).run();
-      } catch (dbErr) {
-        console.error('D1 저장 오류:', dbErr);
-      }
+    const createdAt = new Date().toISOString();
+
+    const insertResult = await env.DB.prepare(
+      `INSERT INTO inquiries (user_id, username, global_name, category, content, budget, status, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, '대기중', ?)`
+    ).bind(
+      String(user.id),
+      String(user.username || ''),
+      String(user.global_name || user.username || ''),
+      String(category || '기타'),
+      String(content),
+      String(budget || '미정/협의'),
+      createdAt
+    ).run();
+
+    if (!insertResult.success) {
+      return new Response(JSON.stringify({ error: '데이터베이스 저장에 실패했습니다.' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // 2. 디스코드 채널 알림 발송
@@ -47,7 +55,7 @@ export async function onRequestPost({ request, env }) {
         ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
         : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
-      await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+      fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
         method: 'POST',
         headers: {
           'Authorization': `Bot ${botToken}`,
@@ -64,10 +72,10 @@ export async function onRequestPost({ request, env }) {
             ],
             thumbnail: { url: avatarUrl },
             footer: { text: `User ID: ${user.id}` },
-            timestamp: now
+            timestamp: createdAt
           }]
         })
-      });
+      }).catch(err => console.error('디스코드 채널 전송 실패:', err));
     }
 
     return new Response(JSON.stringify({ success: true }), {
@@ -76,7 +84,7 @@ export async function onRequestPost({ request, env }) {
     });
 
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: `서버 오류: ${err.message}` }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
