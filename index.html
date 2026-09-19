@@ -41,7 +41,7 @@
 <!-- NAVBAR -->
 <nav class="glass-nav fixed top-0 w-full z-50 border-b border-accent-border transition-all">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between py-3">
-    <a href="#" class="flex items-center gap-2.5 text-xl font-bold tracking-tight text-white group">
+    <a href="/" class="flex items-center gap-2.5 text-xl font-bold tracking-tight text-white group">
       <div class="w-10 h-10 rounded-xl bg-discord flex items-center justify-center text-white shadow-lg shadow-discord/30 group-hover:scale-105 transition-transform">
         <i class="fa-brands fa-discord text-xl"></i>
       </div>
@@ -58,10 +58,10 @@
     <!-- 우측 로그인 / 프로필 영역 -->
     <div class="flex items-center gap-3">
       <div id="navAuthArea" class="relative flex items-center gap-2">
-        <a href="/api/auth/login" class="px-4 py-2 text-sm font-semibold rounded-lg bg-discord hover:bg-discord-hover text-white flex items-center gap-2 transition-all shadow-md shadow-discord/20 active:scale-95 cursor-pointer">
+        <button onclick="discordLogin()" class="px-4 py-2 text-sm font-semibold rounded-lg bg-discord hover:bg-discord-hover text-white flex items-center gap-2 transition-all shadow-md shadow-discord/20 active:scale-95 cursor-pointer">
           <i class="fa-brands fa-discord text-base"></i>
           <span>로그인</span>
-        </a>
+        </button>
       </div>
     </div>
   </div>
@@ -286,10 +286,10 @@
         <p class="text-slate-400 text-sm mb-6 max-w-md mx-auto">
           신속한 본인 확인 및 답변 DM 발송을 위해 디스코드 계정 인증 후 문의 접수가 가능합니다.
         </p>
-        <a href="/api/auth/login" class="px-8 py-3.5 rounded-xl bg-discord hover:bg-discord-hover text-white font-semibold text-sm inline-flex items-center justify-center gap-2.5 transition-all shadow-md shadow-discord/20 active:scale-95 cursor-pointer">
+        <button onclick="discordLogin()" class="px-8 py-3.5 rounded-xl bg-discord hover:bg-discord-hover text-white font-semibold text-sm inline-flex items-center justify-center gap-2.5 transition-all shadow-md shadow-discord/20 active:scale-95 cursor-pointer">
           <i class="fa-brands fa-discord text-lg"></i>
           <span>디스코드로 로그인하기</span>
-        </a>
+        </button>
       </div>
 
       <!-- 2. 로그인 완료 시 열리는 고급 문의 폼 -->
@@ -349,13 +349,11 @@
             ></textarea>
           </div>
 
-          <!-- 희망 예산 단독 입력창 -->
           <div>
             <label class="block text-xs font-bold text-slate-400 mb-1.5">희망 예산 (선택)</label>[cite: 3]
             <input type="text" id="inquiryBudget" placeholder="예: 3~5만원" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-discord[cite: 3]">
           </div>
 
-          <!-- 전송 버튼 -->
           <button 
             id="submitBtn" 
             onclick="submitInquiry()" 
@@ -368,7 +366,6 @@
           <div id="statusMsg" class="hidden p-3.5 rounded-xl text-sm border mt-3 transition-all text-center"></div>
         </div>
 
-        <!-- 하단 문의 내역 아코디언 -->
         <div id="inquiryHistoryBox" class="mt-6 pt-5 border-t border-slate-800">
           <div class="flex items-center justify-between text-xs text-slate-400 mb-2 cursor-pointer" onclick="toggleHistory()">
             <span class="font-semibold"><i class="fa-solid fa-clock-rotate-left mr-1"></i> 최근 내가 보낸 문의 내역 (<span id="historyCount">0</span>)</span>
@@ -432,6 +429,7 @@
 <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
 <script>
+// 최상단 즉각 정의: 버튼 클릭 시 즉시 리디렉트
 function discordLogin() {
   window.location.href = '/api/auth/login';
 }
@@ -464,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const isLoginSuccess = urlParams.get('login') === 'success';
   const uParam = urlParams.get('u');
 
-  // 로그인 성공 콜백 직후
+  // 1. 로그인 직후 넘어온 유저 정보 처리 (최우선 순위)
   if (isLoginSuccess && uParam) {
     try {
       const parsedUser = JSON.parse(decodeURIComponent(uParam));
@@ -475,20 +473,22 @@ document.addEventListener('DOMContentLoaded', () => {
       handleContactNavClick();
       window.history.replaceState({}, document.title, window.location.pathname);
       return;
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
   }
 
-  // 로컬 캐시 확인
+  // 2. 저장된 로컬 캐시가 있으면 즉시 렌더링 유지 (화면 튕김 차단)
   const cached = localStorage.getItem(STORAGE_USER_KEY);
   if (cached) {
     try {
       currentUser = JSON.parse(cached);
       renderLoggedInUser(currentUser);
     } catch (e) {}
+  } else {
+    // 캐시가 없을 때만 백엔드 /api/me 검증
+    checkAuthSession();
   }
-
-  // 서버 세션 최종 확인
-  checkAuthSession();
 });
 
 async function checkAuthSession() {
@@ -500,19 +500,12 @@ async function checkAuthSession() {
         currentUser = data.user;
         localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(currentUser));
         renderLoggedInUser(data.user);
-      } else {
-        // 서버 세션이 없으면 로컬 캐시 완전 정리
-        if (currentUser && !window.location.search.includes('login=success')) {
-          currentUser = null;
-          localStorage.removeItem(STORAGE_USER_KEY);
-          renderLoggedOutUser();
-        }
       }
     }
   } catch (err) {}
 }
 
-// 로그아웃 무한반복 원천 해결 (로컬스토리지 + 세션스토리지 + 서버쿠키 완벽 파기)
+// 오직 사용자가 로그아웃 버튼을 눌렀을 때만 완전히 지우고 리셋
 async function logout() {
   currentUser = null;
   localStorage.removeItem(STORAGE_USER_KEY);
@@ -523,22 +516,6 @@ async function logout() {
   } catch (e) {}
 
   window.location.replace('/');
-}
-
-function renderLoggedOutUser() {
-  const navAuthArea = document.getElementById('navAuthArea');
-  if (navAuthArea) {
-    navAuthArea.innerHTML = `
-      <a href="/api/auth/login" class="px-4 py-2 text-sm font-semibold rounded-lg bg-discord hover:bg-discord-hover text-white flex items-center gap-2 transition-all shadow-md shadow-discord/20 active:scale-95 cursor-pointer">
-        <i class="fa-brands fa-discord text-base"></i>
-        <span>로그인</span>
-      </a>
-    `;
-  }
-  const loginSection = document.getElementById('loginSection');
-  const userSection = document.getElementById('userSection');
-  if (loginSection) loginSection.classList.remove('hidden');
-  if (userSection) userSection.classList.add('hidden');
 }
 
 function renderLoggedInUser(user) {
