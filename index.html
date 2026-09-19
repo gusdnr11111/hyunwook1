@@ -34,11 +34,6 @@
   .glow-box { box-shadow: 0 0 25px rgba(88, 101, 242, 0.15); }
   .glow-box:hover { box-shadow: 0 0 35px rgba(0, 212, 255, 0.25); }
   .glass-nav { background: rgba(11, 15, 25, 0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-
-  /* 우측 상단 프로필 영역 호버 시 로그아웃 박스 노출 */
-  .profile-wrapper:hover .logout-btn-box {
-    display: block;
-  }
 </style>
 </head>
 <body class="bg-dark-bg text-slate-100 min-h-screen flex flex-col">
@@ -62,7 +57,7 @@
 
     <!-- 우측 상단 로그인 / 프로필 영역 -->
     <div class="flex items-center gap-3">
-      <div id="navAuthArea" class="flex items-center gap-2">
+      <div id="navAuthArea" class="relative flex items-center gap-2">
         <a href="/api/auth/login" class="px-4 py-2 text-sm font-semibold rounded-lg bg-discord hover:bg-discord-hover text-white flex items-center gap-2 transition-all shadow-md shadow-discord/20 active:scale-95 cursor-pointer">
           <i class="fa-brands fa-discord text-base"></i>
           <span>로그인</span>
@@ -145,7 +140,7 @@
         </div>
         <h3 class="text-xl font-bold text-white mb-2">🚀 서버 백업 및 복구 봇</h3>
         <p class="text-slate-400 text-sm mb-5 leading-relaxed">
-          예기치 못한 분실 상황에 대비하여 <strong>채널 권한, 역할, 카테고리, 메시지</strong>를 주기적으로 안전하게 클라우드에 백업합니다.
+          예기치 못한 상황에 대비하여 <strong>채널 권한, 역할, 카테고리, 메시지</strong>를 주기적으로 안전하게 클라우드에 백업합니다.
         </p>
         <ul class="space-y-2.5 text-xs sm:text-sm text-slate-300 mb-6">
           <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-accent-cyan text-xs"></i> 최근 200건 이상 메시지 및 첨부파일 백업</li>
@@ -297,7 +292,7 @@
         </a>
       </div>
 
-      <!-- 2. 로그인 완료 시 열리는 원래의 고급 문의 폼 (보조연락처 삭제 완료) -->
+      <!-- 2. 로그인 완료 시 열리는 고급 문의 폼 -->
       <div id="userSection" class="hidden">
         
         <!-- 프로필 헤더 배너 -->
@@ -432,7 +427,6 @@
 <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
 <script>
-// 최상단 즉시 정의 (스크립트 오류로 버튼 먹통 방지)
 function discordLogin() {
   window.location.href = '/api/auth/login';
 }
@@ -441,7 +435,24 @@ let currentUser = null;
 const STORAGE_USER_KEY = 'devbot_user_cache';
 const STORAGE_HISTORY_KEY = 'devbot_inquiry_history';
 
-// DOM 준비 시 실행
+// 바깥 클릭 시 우측 상단 로그아웃 메뉴 닫기
+document.addEventListener('click', (e) => {
+  const dropdown = document.getElementById('userMenuDropdown');
+  const trigger = document.getElementById('userProfileTrigger');
+  if (dropdown && trigger && !trigger.contains(e.target) && !dropdown.contains(e.target)) {
+    dropdown.classList.add('hidden');
+  }
+});
+
+// 프로필 클릭 시 로그아웃 버튼 토글
+function toggleUserDropdown(e) {
+  e.stopPropagation();
+  const dropdown = document.getElementById('userMenuDropdown');
+  if (dropdown) {
+    dropdown.classList.toggle('hidden');
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   loadInquiryHistory();
 
@@ -449,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const isLoginSuccess = urlParams.get('login') === 'success';
   const uParam = urlParams.get('u');
 
-  // 1. 로그인 직후 URL 파라미터가 있을 때 즉각 캐시 및 프로필 표시
+  // 1. 디스코드 로그인 콜백 직후
   if (isLoginSuccess && uParam) {
     try {
       const parsedUser = JSON.parse(decodeURIComponent(uParam));
@@ -463,7 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {}
   }
 
-  // 2. 기존 로컬 캐시가 있으면 즉시 렌더링 (깜빡임/무한반복 방지)
+  // 2. 캐시 확인
   const cached = localStorage.getItem(STORAGE_USER_KEY);
   if (cached) {
     try {
@@ -472,7 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {}
   }
 
-  // 3. 백엔드 /api/me 검증
+  // 3. 서버 세션 체크
   checkAuthSession();
 });
 
@@ -512,17 +523,18 @@ function renderLoggedInUser(user) {
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
     : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
-  // 우측 상단: 프사 + 이름, 마우스 올리면(Hover) 로그아웃 버튼만 노출
+  // 우측 상단: 클릭 시 로그아웃 버튼 토글
   const navAuthArea = document.getElementById('navAuthArea');
   if (navAuthArea) {
     navAuthArea.innerHTML = `
-      <div class="relative profile-wrapper py-2">
-        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/90 border border-slate-700 cursor-pointer">
+      <div class="relative py-1">
+        <button id="userProfileTrigger" onclick="toggleUserDropdown(event)" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700 cursor-pointer active:scale-95 transition-all">
           <img src="${avatarUrl}" alt="${displayName}" class="w-7 h-7 rounded-full object-cover border border-discord">
           <span class="text-xs font-semibold text-white max-w-[100px] truncate hidden sm:inline">${displayName}</span>
-        </div>
+          <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+        </button>
 
-        <div class="logout-btn-box hidden absolute right-0 top-full mt-1 w-28 rounded-xl bg-dark-card border border-accent-border shadow-2xl p-1.5 z-50">
+        <div id="userMenuDropdown" class="hidden absolute right-0 top-full mt-2 w-32 rounded-xl bg-dark-card border border-accent-border shadow-2xl p-1.5 z-50">
           <button onclick="logout()" class="w-full text-center py-2 px-2 rounded-lg text-xs text-red-400 hover:bg-red-500/10 font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span>로그아웃</span>
@@ -593,6 +605,7 @@ function updateCharCount() {
 
 async function submitInquiry() {
   if (!currentUser) {
+    showToast('로그인이 필요합니다.', 'error');
     discordLogin();
     return;
   }
@@ -627,7 +640,7 @@ async function submitInquiry() {
 
     const data = await res.json();
 
-    if (res.ok) {
+    if (res.ok && data.success) {
       showStatusMsg('✅ 문의가 성공적으로 접수되었습니다! 디스코드 DM으로 빠른 시일 내에 연락드리겠습니다.', 'success');
       showToast('문의가 정상 접수되었습니다.', 'success');
 
@@ -642,6 +655,7 @@ async function submitInquiry() {
       updateCharCount();
     } else {
       showStatusMsg('❌ ' + (data.error || '접수에 실패했습니다.'), 'error');
+      showToast(data.error || '전송 실패', 'error');
     }
   } catch (err) {
     showStatusMsg('네트워크 통신 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.', 'error');
