@@ -160,7 +160,7 @@
 
     <div class="max-w-xl mx-auto bg-dark-bg/90 border border-slate-700 rounded-2xl p-6 text-left shadow-inner">
       
-      <!-- 비로그인 상태 -->
+      <!-- 비로그인 상태 (기본값) -->
       <div id="loginSection" class="text-center py-6">
         <div class="w-14 h-14 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 text-2xl mx-auto mb-3">
           <i class="fa-brands fa-discord text-discord"></i>
@@ -249,27 +249,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('tk');
 
-  // 1. 디스코드 콜백 토큰 수신 처리
+  // 1. 디스코드에서 로그인을 마치고 돌아온 순간에만 세션 생성
   if (token) {
     try {
       currentUser = JSON.parse(decodeURIComponent(escape(atob(token))));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
       window.history.replaceState({}, document.title, window.location.pathname);
+      renderUserUI(currentUser);
+      const contactEl = document.getElementById('contact');
+      if (contactEl) contactEl.scrollIntoView({ behavior: 'smooth' });
+      return;
     } catch (e) {}
-  } else {
-    // 2. 기존 로컬 세션 확인
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try { currentUser = JSON.parse(saved); } catch (e) {}
-    }
   }
 
-  // 3. UI 바인딩
-  if (currentUser) {
-    renderUserUI(currentUser);
-    if (urlParams.get('login') === 'success') {
-      const el = document.getElementById('contact');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+  // 2. 이미 로그인되어 있던 정상 세션이 있을 때만 로드
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+      renderUserUI(currentUser);
+    } catch (e) {
+      localStorage.removeItem(STORAGE_KEY);
     }
   }
 });
@@ -280,7 +280,7 @@ function renderUserUI(user) {
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
     : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
-  // 상단 네비바 UI
+  // 우측 상단 프로필 노출
   document.getElementById('navAuthArea').innerHTML = `
     <div class="relative">
       <button onclick="document.getElementById('logoutDropdown').classList.toggle('hidden')" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700">
@@ -296,7 +296,7 @@ function renderUserUI(user) {
     </div>
   `;
 
-  // 문의 섹션 폼 활성화
+  // 문의 섹션 폼 노출
   document.getElementById('loginSection').classList.add('hidden');
   document.getElementById('userSection').classList.remove('hidden');
 
@@ -305,8 +305,9 @@ function renderUserUI(user) {
   document.getElementById('formUserAvatar').src = avatarUrl;
 }
 
-// 로그아웃
+// 로그아웃 버튼을 누르면 무조건 비로그인 상태로 복구
 function logout() {
+  currentUser = null;
   localStorage.removeItem(STORAGE_KEY);
   sessionStorage.clear();
   fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
@@ -324,7 +325,7 @@ function prefillInquiry(title) {
   }
 }
 
-// 문의 전송 (currentUser 객체 함께 전송)
+// 문의 전송
 async function submitInquiry() {
   if (!currentUser) {
     alert('로그인이 필요합니다.');
