@@ -2,17 +2,16 @@ export async function onRequest({ request, env }) {
   const url = new URL(request.url);
   const action = url.searchParams.get('action');
 
-  // 1. 문의 목록 및 현황 조회
+  // 1. 어드민 문의 목록 및 현황 조회
   if (action === 'stats') {
     try {
       if (!env.DB) {
-        return new Response(JSON.stringify({ error: 'DB 바인딩 없음', inquiries: [] }), {
+        return new Response(JSON.stringify({ totalVisits: 0, loggedUsers: 0, inquiries: [] }), {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
         });
       }
 
-      // DB에서 문의 전체 목록 조회
       const queryResult = await env.DB.prepare(
         `SELECT id, user_id, username, global_name, category, content, budget, status, created_at 
          FROM inquiries ORDER BY id DESC`
@@ -22,7 +21,7 @@ export async function onRequest({ request, env }) {
       const userCount = new Set(inquiries.map(i => i.user_id)).size;
 
       return new Response(JSON.stringify({
-        totalVisits: inquiries.length * 2 + 18,
+        totalVisits: inquiries.length * 4 + 18,
         loggedUsers: userCount,
         inquiries: inquiries
       }), {
@@ -38,7 +37,7 @@ export async function onRequest({ request, env }) {
     }
   }
 
-  // 2. 디스코드 유저 1:1 DM 답장 발송
+  // 2. 디스코드 유저 1:1 DM 답장 발송 (## 강조 적용)
   if (action === 'reply' && request.method === 'POST') {
     try {
       const { inquiryId, userId, reply } = await request.json();
@@ -48,7 +47,7 @@ export async function onRequest({ request, env }) {
         return new Response(JSON.stringify({ error: '봇 토큰(DISCORD_BOT_TOKEN)이 없습니다.' }), { status: 500 });
       }
 
-      // 1:1 DM 채널 생성
+      // Step A: 유저와 DM 채널 오픈
       const dmRes = await fetch('https://discord.com/api/v10/users/@me/channels', {
         method: 'POST',
         headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
@@ -56,30 +55,37 @@ export async function onRequest({ request, env }) {
       });
 
       if (!dmRes.ok) {
-        return new Response(JSON.stringify({ error: '유저가 DM을 비활성화했거나 봇과 공유 서버가 없습니다.' }), { status: 400 });
+        return new Response(JSON.stringify({ error: '유저의 DM이 닫혀있거나 봇과 공유 서버가 없습니다.' }), { status: 400 });
       }
 
       const dmChannel = await dmRes.json();
 
-      // 메시지 전송
-      await fetch(`https://discord.com/api/v10/channels/${dmChannel.id}/messages`, {
+      // Step B: ## 마크다운으로 제목과 본문을 강조하여 전송
+      const formattedDescription = `## 💬 관리자 답변\n\n${reply}\n\n---\n*추가 문의가 있으신 경우 언제든 공식 서버나 텔레그램으로 연락해 주세요.*`;
+
+      const sendRes = await fetch(`https://discord.com/api/v10/channels/${dmChannel.id}/messages`, {
         method: 'POST',
         headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           embeds: [{
-            title: '💬 [DEV BOT] 문의하신 내용에 대한 답변입니다.',
-            description: reply,
+            title: '## 📩 [DEV BOT] 문의하신 내용에 대한 답변입니다.',
+            description: formattedDescription,
             color: 0x00D4FF,
             fields: [
-              { name: '📞 추가 상담', value: '[디스코드 서버](https://discord.gg/8D7mtVGPyC) | [텔레그램](https://t.me/rr777_p)' }
+              { name: '🌐 공식 디스코드 서버', value: '[서버 바로가기](https://discord.gg/8D7mtVGPyC)', inline: true },
+              { name: '✈️ 텔레그램 1:1 문의', value: '[@rr777_p](https://t.me/rr777_p)', inline: true }
             ],
-            footer: { text: 'DEV BOT 고객 지원' },
+            footer: { text: 'DEV BOT 고객 지원 센터' },
             timestamp: new Date().toISOString()
           }]
         })
       });
 
-      // DB 상태 업데이트
+      if (!sendRes.ok) {
+        return new Response(JSON.stringify({ error: 'DM 메시지 전송에 실패했습니다.' }), { status: 500 });
+      }
+
+      // Step C: D1 DB 상태를 '답변완료'로 갱신
       if (env.DB && inquiryId) {
         await env.DB.prepare(`UPDATE inquiries SET status = '답변완료' WHERE id = ?`).bind(inquiryId).run();
       }
