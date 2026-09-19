@@ -16,24 +16,5 @@ export async function onRequest(context) {
       redirect_uri: env.DISCORD_REDIRECT_URI
     })
   });
-  const tokenData = await tokenRes.json();
-  if (!tokenData.access_token) return new Response('Token error', { status: 400 });
-
-  // 유저 정보 조회
-  const userRes = await fetch('https://discord.com/api/users/@me', {
-    headers: { Authorization: `Bearer ${tokenData.access_token}` }
-  });
-  const user = await userRes.json();
-
-  // 쿠키에 세션 저장 (간단한 방식: user JSON을 base64로)
-  const session = btoa(JSON.stringify({ id: user.id, username: user.username, global_name: user.global_name, avatar: user.avatar }));
-  const cookie = `session=${session}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`;
-
-  return new Response(null, {
-    status: 302,
-    headers: {
-      'Location': '/',
-      'Set-Cookie': cookie
-    }
-  });
+  // ... (이하 생략)
 }
