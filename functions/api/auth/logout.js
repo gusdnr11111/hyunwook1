@@ -1,9 +1,9 @@
-export async function onRequest() {
-  return new Response(null, {
-    status: 302,
+export async function onRequestPost() {
+  return new Response(JSON.stringify({ success: true }), {
+    status: 200,
     headers: {
-      'Location': '/',
-      'Set-Cookie': 'session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0'
+      'Content-Type': 'application/json',
+      'Set-Cookie': 'devbot_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax'
     }
   });
 }
