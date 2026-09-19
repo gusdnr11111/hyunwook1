@@ -4,245 +4,178 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DEV BOT 관리자 대시보드</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.tailwindcss.com"></script>
-
 <style>
   body { background: #0b0f19; color: #f8fafc; font-family: 'Inter', 'Noto Sans KR', sans-serif; }
 </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-<!-- LOGIN MODAL (로그인 전) -->
+<!-- LOGIN MODAL -->
 <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-  <div class="bg-[#151c2c] border border-slate-700/80 rounded-2xl max-w-md w-full p-8 shadow-2xl">
+  <div class="bg-[#151c2c] border border-slate-700 rounded-2xl max-w-sm w-full p-6 shadow-2xl">
     <div class="text-center mb-6">
-      <div class="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center mx-auto mb-3 text-white text-xl shadow-lg shadow-indigo-500/30">
+      <div class="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center mx-auto mb-3 text-white text-xl">
         <i class="fa-solid fa-lock"></i>
       </div>
-      <h2 class="text-xl font-bold text-white">관리자 인증</h2>
-      <p class="text-xs text-slate-400 mt-1">DEV BOT 관리자 계정으로 로그인해 주세요.</p>
+      <h2 class="text-lg font-bold text-white">관리자 인증</h2>
+      <p class="text-xs text-slate-400 mt-1">아이디와 비밀번호를 입력해 주세요.</p>
     </div>
 
-    <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+    <form onsubmit="handleLogin(event)" class="space-y-4">
       <div>
         <label class="block text-xs font-semibold text-slate-300 mb-1">아이디</label>
-        <input type="text" id="adminId" required placeholder="관리자 아이디" class="w-full bg-[#0b0f19] border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+        <input type="text" id="adminId" required placeholder="아이디" class="w-full bg-[#0b0f19] border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
       </div>
       <div>
         <label class="block text-xs font-semibold text-slate-300 mb-1">비밀번호</label>
-        <input type="password" id="adminPw" required placeholder="관리자 비밀번호" class="w-full bg-[#0b0f19] border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+        <input type="password" id="adminPw" required placeholder="비밀번호" class="w-full bg-[#0b0f19] border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
       </div>
-      <div id="loginError" class="hidden text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg p-2.5 text-center"></div>
-      <button type="submit" class="w-full py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition-all shadow-md shadow-indigo-600/30">
+      <button type="submit" class="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm">
         대시보드 로그인
       </button>
     </form>
   </div>
 </div>
 
-<!-- DASHBOARD (로그인 후) -->
+<!-- DASHBOARD -->
 <div id="dashboardArea" class="hidden flex-1 flex flex-col">
-  <!-- Topbar -->
-  <header class="border-b border-slate-800 bg-[#151c2c]/80 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-40">
+  <header class="border-b border-slate-800 bg-[#151c2c] px-6 py-4 flex items-center justify-between sticky top-0 z-40">
     <div class="flex items-center gap-3">
-      <span class="px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-xs font-bold">ADMIN PANEL</span>
-      <h1 class="text-lg font-bold text-white">DEV BOT 통합 관리 대시보드</h1>
+      <span class="px-2.5 py-1 rounded bg-indigo-500/20 text-indigo-400 text-xs font-bold">DEV BOT ADMIN</span>
+      <h1 class="text-base font-bold text-white">통합 통계 및 문의 관리</h1>
     </div>
-    <div class="flex items-center gap-4">
-      <span class="text-xs text-slate-400"><i class="fa-solid fa-circle-user text-emerald-400 mr-1"></i> gusdnr0216 (최고관리자)</span>
-      <button onclick="adminLogout()" class="text-xs text-red-400 hover:text-red-300 border border-slate-700 hover:border-red-500/40 rounded-lg px-3 py-1.5 transition-colors">
-        로그아웃
-      </button>
-    </div>
+    <button onclick="sessionStorage.clear(); location.reload();" class="text-xs text-red-400 border border-slate-700 rounded-lg px-3 py-1.5">
+      로그아웃
+    </button>
   </header>
 
-  <!-- Main Content -->
-  <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 space-y-8">
-    
-    <!-- 통계 카드 (접속 및 문의 현황) -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-      <div class="bg-[#151c2c] border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-2xl">
-          <i class="fa-solid fa-inbox"></i>
-        </div>
-        <div>
-          <div class="text-xs text-slate-400">총 문의 접수</div>
-          <div id="statTotalInquiries" class="text-2xl font-extrabold text-white mt-0.5">0건</div>
-        </div>
+  <main class="max-w-6xl mx-auto w-full px-4 py-8 space-y-6">
+    <!-- 방문자 & 유저 통계 카드 -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-[#151c2c] border border-slate-800 rounded-xl p-5">
+        <div class="text-xs text-slate-400">누적 사이트 방문자 수</div>
+        <div id="statVisits" class="text-2xl font-extrabold text-white mt-1">0회</div>
       </div>
-
-      <div class="bg-[#151c2c] border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-2xl">
-          <i class="fa-solid fa-users"></i>
-        </div>
-        <div>
-          <div class="text-xs text-slate-400">접속/로그인 유저</div>
-          <div id="statActiveUsers" class="text-2xl font-extrabold text-white mt-0.5">0명</div>
-        </div>
+      <div class="bg-[#151c2c] border border-slate-800 rounded-xl p-5">
+        <div class="text-xs text-slate-400">디스코드 연동 유저 수</div>
+        <div id="statUsers" class="text-2xl font-extrabold text-emerald-400 mt-1">0명</div>
       </div>
-
-      <div class="bg-[#151c2c] border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-2xl">
-          <i class="fa-solid fa-paper-plane"></i>
-        </div>
-        <div>
-          <div class="text-xs text-slate-400">답변 완료율</div>
-          <div id="statReplyRate" class="text-2xl font-extrabold text-white mt-0.5">100%</div>
-        </div>
+      <div class="bg-[#151c2c] border border-slate-800 rounded-xl p-5">
+        <div class="text-xs text-slate-400">접수된 문의 건수</div>
+        <div id="statInquiries" class="text-2xl font-extrabold text-blue-400 mt-1">0건</div>
       </div>
     </div>
 
-    <!-- 문의 관리 및 실시간 DM 답장 섹션 -->
+    <!-- 문의 목록 및 DM 답장 -->
     <div class="bg-[#151c2c] border border-slate-800 rounded-2xl p-6">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h2 class="text-lg font-bold text-white">접수된 문의 내역 및 답장 발송</h2>
-          <p class="text-xs text-slate-400 mt-0.5">답변을 작성해 [DM 발송]을 누르면 디스코드 봇이 해당 유저에게 개인 DM으로 답장을 보냅니다.</p>
-        </div>
-        <button onclick="loadAdminData()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 flex items-center gap-1.5 transition-all">
-          <i class="fa-solid fa-rotate-right"></i> 새로고침
-        </button>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-base font-bold text-white">접수된 문의 목록 & 1:1 DM 발송</h2>
+        <button onclick="loadData()" class="text-xs text-slate-400 hover:text-white"><i class="fa-solid fa-rotate-right"></i> 새로고침</button>
       </div>
 
-      <div id="inquiryTableContainer" class="space-y-4">
-        <div class="text-center py-12 text-slate-500 text-sm">
-          <i class="fa-solid fa-spinner fa-spin mr-2"></i> 데이터를 불러오고 있습니다...
-        </div>
+      <div id="inquiryList" class="space-y-4">
+        <div class="text-center py-8 text-slate-500 text-xs">불러오는 중...</div>
       </div>
     </div>
-
   </main>
 </div>
 
 <script>
-let adminToken = sessionStorage.getItem('devbot_admin_auth');
-
-document.addEventListener('DOMContentLoaded', () => {
-  if (adminToken === 'authorized') {
-    showDashboard();
-  }
-});
-
-// 어드민 로그인 핸들러 (아이디: gusdnr0216 / 비번: gusdnr0216!)
-async function handleAdminLogin(e) {
+function handleLogin(e) {
   e.preventDefault();
   const id = document.getElementById('adminId').value.trim();
   const pw = document.getElementById('adminPw').value.trim();
-  const errorEl = document.getElementById('loginError');
 
   if (id === 'gusdnr0216' && pw === 'gusdnr0216!') {
-    sessionStorage.setItem('devbot_admin_auth', 'authorized');
-    errorEl.classList.add('hidden');
-    showDashboard();
+    sessionStorage.setItem('admin_auth', 'true');
+    document.getElementById('loginModal').classList.add('hidden');
+    document.getElementById('dashboardArea').classList.remove('hidden');
+    loadData();
   } else {
-    errorEl.textContent = '아이디 또는 비밀번호가 일치하지 않습니다.';
-    errorEl.classList.remove('hidden');
+    alert('아이디 또는 비밀번호가 틀렸습니다.');
   }
 }
 
-function showDashboard() {
-  document.getElementById('loginModal').classList.add('hidden');
-  document.getElementById('dashboardArea').classList.remove('hidden');
-  loadAdminData();
-}
+document.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('admin_auth') === 'true') {
+    document.getElementById('loginModal').classList.add('hidden');
+    document.getElementById('dashboardArea').classList.remove('hidden');
+    loadData();
+  }
+});
 
-function adminLogout() {
-  sessionStorage.removeItem('devbot_admin_auth');
-  location.reload();
-}
-
-// 어드민 문의 내역 불러오기
-async function loadAdminData() {
-  const container = document.getElementById('inquiryTableContainer');
+async function loadData() {
+  const container = document.getElementById('inquiryList');
   try {
-    const res = await fetch('/api/admin?action=list');
-    if (!res.ok) throw new Error();
+    const res = await fetch('/api/admin?action=stats');
     const data = await res.json();
 
+    document.getElementById('statVisits').textContent = `${data.totalVisits || 0}회`;
+    document.getElementById('statUsers').textContent = `${data.loggedUsers || 0}명`;
+    document.getElementById('statInquiries').textContent = `${(data.inquiries || []).length}건`;
+
     const list = data.inquiries || [];
-    document.getElementById('statTotalInquiries').textContent = `${list.length}건`;
-
-    // 유니크 유저 수 카운트
-    const uniqueUsers = new Set(list.map(i => i.user_id)).size;
-    document.getElementById('statActiveUsers').textContent = `${uniqueUsers}명`;
-
     if (list.length === 0) {
-      container.innerHTML = `<div class="text-center py-12 text-slate-500 text-sm">접수된 문의가 아직 없습니다.</div>`;
+      container.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">접수된 문의가 없습니다.</div>`;
       return;
     }
 
     container.innerHTML = list.map(item => `
-      <div class="bg-[#0b0f19] border border-slate-800 rounded-xl p-5 space-y-3">
-        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
-          <div class="flex items-center gap-2.5">
-            <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">${item.category}</span>
-            <span class="font-bold text-sm text-white">${item.global_name || item.username}</span>
-            <span class="text-xs text-slate-400 font-mono">(@${item.username} / ID: ${item.user_id})</span>
+      <div class="bg-[#0b0f19] border border-slate-800 rounded-xl p-4 space-y-3">
+        <div class="flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-bold">${item.category}</span>
+            <span class="font-bold text-white">${item.global_name || item.username}</span>
+            <span class="text-slate-500 font-mono">(@${item.username})</span>
           </div>
-          <span class="text-xs text-slate-500">${new Date(item.created_at).toLocaleString('ko-KR')}</span>
+          <span class="text-slate-500">${new Date(item.created_at).toLocaleString('ko-KR')}</span>
         </div>
-
-        <div class="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">${item.content}</div>
-
-        <div class="text-xs text-slate-400 bg-slate-900/80 p-2.5 rounded-lg flex items-center justify-between">
-          <span><strong>희망 예산:</strong> ${item.budget || '미정/협의'}</span>
-          <span class="text-emerald-400"><i class="fa-solid fa-circle-check text-[10px]"></i> 접수 완료</span>
+        <div class="text-sm text-slate-300 whitespace-pre-wrap">${item.content}</div>
+        <div class="text-xs text-slate-400 bg-slate-900/60 p-2 rounded flex justify-between">
+          <span>예산: ${item.budget || '미정'}</span>
+          <span class="${item.status === '답변완료' ? 'text-emerald-400' : 'text-amber-400'}">${item.status || '대기중'}</span>
         </div>
-
-        <!-- DM 답장 입력 영역 -->
-        <div class="pt-2 border-t border-slate-800/60 flex flex-col sm:flex-row gap-2">
-          <input type="text" id="reply_input_${item.id}" placeholder="해당 유저에게 보낼 디스코드 DM 답변 내용을 입력하세요..." class="flex-1 bg-[#151c2c] border border-slate-700 rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-          <button onclick="sendDiscordDm('${item.id}', '${item.user_id}', '${item.global_name || item.username}')" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all">
-            <i class="fa-solid fa-paper-plane"></i>
-            <span>DM 답변 발송</span>
+        <div class="flex gap-2 pt-2 border-t border-slate-800">
+          <input type="text" id="reply_${item.id}" placeholder="유저 디스코드 DM으로 전송할 답변 입력..." class="flex-1 bg-[#151c2c] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+          <button onclick="sendReply('${item.id}', '${item.user_id}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold">
+            DM 답장 전송
           </button>
         </div>
       </div>
     `).join('');
-
   } catch (e) {
-    container.innerHTML = `<div class="text-center py-10 text-red-400 text-sm">데이터를 불러오는 중 오류가 발생했습니다.</div>`;
+    container.innerHTML = `<div class="text-center py-8 text-red-400 text-xs">데이터 로드 실패</div>`;
   }
 }
 
-// 디스코드 봇을 통한 유저 DM 발송
-async function sendDiscordDm(inquiryId, userId, userName) {
-  const input = document.getElementById(`reply_input_${inquiryId}`);
-  const replyMessage = input.value.trim();
+async function sendReply(inquiryId, userId) {
+  const input = document.getElementById(`reply_${inquiryId}`);
+  const reply = input.value.trim();
+  if (!reply) return alert('답변을 입력하세요.');
 
-  if (!replyMessage) {
-    alert('답변 내용을 입력해 주세요.');
-    return;
-  }
-
-  if (!confirm(`${userName}님에게 디스코드 DM으로 답변을 전송하시겠습니까?`)) return;
+  if (!confirm('유저 디스코드 DM으로 답변을 보내시겠습니까?')) return;
 
   try {
     const res = await fetch('/api/admin?action=reply', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        inquiryId,
-        userId,
-        reply: replyMessage
-      })
+      body: JSON.stringify({ inquiryId, userId, reply })
     });
-
     const data = await res.json();
     if (res.ok && data.success) {
-      alert('✅ 유저 디스코드 DM으로 답변이 성공적으로 발송되었습니다!');
+      alert('✅ 유저 디스코드 DM으로 전송 완료!');
       input.value = '';
+      loadData();
     } else {
-      alert('❌ DM 발송 실패: ' + (data.error || '알 수 없는 오류'));
+      alert('❌ 발송 실패: ' + (data.error || '알 수 없는 오류'));
     }
-  } catch (err) {
-    alert('❌ 통신 오류 발생');
+  } catch (e) {
+    alert('통신 오류 발생');
   }
 }
 </script>
-
 </body>
 </html>
