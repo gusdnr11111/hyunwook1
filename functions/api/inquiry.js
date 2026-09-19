@@ -3,7 +3,7 @@ export async function onRequestPost({ request, env }) {
     const { category, content, budget, user } = await request.json();
 
     if (!user || !user.id) {
-      return new Response(JSON.stringify({ error: '로그인 정보가 없습니다. 다시 로그인해 주세요.' }), {
+      return new Response(JSON.stringify({ error: '로그인 정보가 없습니다.' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -16,22 +16,25 @@ export async function onRequestPost({ request, env }) {
       });
     }
 
-    // 1. D1 데이터베이스에 문의 저장 (어드민 패널에서 조회할 데이터)
+    const now = new Date().toISOString();
+
+    // 1. D1 DB 저장 (어드민 패널 조회용)
     if (env.DB) {
       try {
         await env.DB.prepare(
           `INSERT INTO inquiries (user_id, username, global_name, category, content, budget, status, created_at) 
-           VALUES (?, ?, ?, ?, ?, ?, '대기중', datetime('now', '+9 hours'))`
+           VALUES (?, ?, ?, ?, ?, ?, '대기중', ?)`
         ).bind(
           String(user.id),
-          user.username || '',
-          user.global_name || user.username || '',
-          category || '기타',
-          content,
-          budget || '미정/협의'
+          String(user.username || ''),
+          String(user.global_name || user.username || ''),
+          String(category || '기타'),
+          String(content),
+          String(budget || '미정/협의'),
+          now
         ).run();
       } catch (dbErr) {
-        console.error('DB 저장 실패:', dbErr);
+        console.error('D1 저장 오류:', dbErr);
       }
     }
 
@@ -61,7 +64,7 @@ export async function onRequestPost({ request, env }) {
             ],
             thumbnail: { url: avatarUrl },
             footer: { text: `User ID: ${user.id}` },
-            timestamp: new Date().toISOString()
+            timestamp: now
           }]
         })
       });
@@ -73,7 +76,7 @@ export async function onRequestPost({ request, env }) {
     });
 
   } catch (err) {
-    return new Response(JSON.stringify({ error: `서버 처리 에러: ${err.message}` }), {
+    return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
