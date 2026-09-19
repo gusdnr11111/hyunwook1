@@ -3,11 +3,10 @@ export async function onRequestGet({ request, env }) {
   const code = url.searchParams.get('code');
 
   if (!code) {
-    return new Response('인증 코드가 없습니다.', { status: 400 });
+    return new Response('인증 코드가 누락되었습니다.', { status: 400 });
   }
 
   try {
-    // 1. 디스코드 Access Token 교환
     const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -26,7 +25,6 @@ export async function onRequestGet({ request, env }) {
 
     const tokenData = await tokenResponse.json();
 
-    // 2. 디스코드 사용자 프로필 조회
     const userResponse = await fetch('https://discord.com/api/users/@me', {
       headers: { Authorization: `Bearer ${tokenData.access_token}` }
     });
@@ -44,19 +42,19 @@ export async function onRequestGet({ request, env }) {
       avatar: user.avatar
     };
 
-    // 3. Base64 인코딩을 거쳐 쿠키 특수문자 깨짐 및 유실 원천 방지
-    const serializedUser = btoa(unescape(encodeURIComponent(JSON.stringify(userData))));
-    const cookieString = `devbot_session=${serializedUser}; Path=/; Max-Age=604800; Secure; SameSite=Lax; HttpOnly`;
+    // 한글 및 특수문자 완벽 호환 URI Component 인코딩
+    const serialized = encodeURIComponent(JSON.stringify(userData));
+    const cookieHeader = `devbot_session=${serialized}; Path=/; Max-Age=604800; Secure; SameSite=Lax; HttpOnly`;
 
     return new Response(null, {
       status: 302,
       headers: {
         'Location': '/?login=success',
-        'Set-Cookie': cookieString
+        'Set-Cookie': cookieHeader
       }
     });
 
   } catch (err) {
-    return new Response(`로그인 처리 중 오류 발생: ${err.message}`, { status: 500 });
+    return new Response(`로그인 처리 오류: ${err.message}`, { status: 500 });
   }
 }
