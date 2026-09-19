@@ -3,146 +3,245 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>어드민 패널 | DEV BOT</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+<title>DEV BOT 관리자 대시보드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter','Noto Sans KR',sans-serif; }
-body { background:#0b0f19; color:#fff; min-height:100vh; padding:2rem; }
-.container { max-width:1000px; margin:0 auto; }
-h1 { font-size:1.8rem; margin-bottom:2rem; color:#5865F2; display:flex; align-items:center; gap:10px; }
-.login-box { max-width:400px; margin:5rem auto; padding:2rem; background:#151c2c; border:1px solid #2d3748; border-radius:16px; }
-.login-box h2 { margin-bottom:1.5rem; text-align:center; }
-.login-box input { width:100%; padding:.9rem 1rem; background:#0b0f19; border:1px solid #2d3748; border-radius:8px; color:#fff; margin-bottom:1rem; font-size:1rem; }
-.login-box button { width:100%; padding:.9rem; background:#5865F2; color:#fff; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:1rem; }
-.login-box button:hover { background:#4752C4; }
-.inquiry-card { background:#151c2c; border:1px solid #2d3748; border-radius:12px; padding:1.5rem; margin-bottom:1rem; }
-.inquiry-card.replied { border-color:#48bb78; }
-.inquiry-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
-.inquiry-header .user { display:flex; align-items:center; gap:.8rem; }
-.inquiry-header img { width:40px; height:40px; border-radius:50%; }
-.inquiry-header .name { font-weight:600; }
-.inquiry-header .id { color:#a0aec0; font-size:.8rem; }
-.badge { padding:.3rem .8rem; border-radius:20px; font-size:.75rem; font-weight:600; }
-.badge.pending { background:rgba(246,173,85,.15); color:#f6ad55; }
-.badge.replied { background:rgba(72,187,120,.15); color:#48bb78; }
-.content { background:#0b0f19; padding:1rem; border-radius:8px; margin-bottom:1rem; color:#cbd5e0; white-space:pre-wrap; }
-.reply-box textarea { width:100%; padding:.8rem; background:#0b0f19; border:1px solid #2d3748; border-radius:8px; color:#fff; font-family:inherit; resize:vertical; min-height:80px; margin-bottom:.8rem; }
-.reply-box button { padding:.7rem 1.5rem; background:#00d4ff; color:#0b0f19; border:none; border-radius:8px; font-weight:600; cursor:pointer; }
-.reply-box button:hover { background:#00b8e0; }
-.timestamp { color:#718096; font-size:.8rem; margin-top:.5rem; }
-.top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; }
-.logout-btn { padding:.5rem 1rem; background:transparent; color:#fc8181; border:1px solid #fc8181; border-radius:8px; cursor:pointer; font-size:.9rem; }
-.logout-btn:hover { background:rgba(252,129,129,.1); }
-.empty { text-align:center; color:#a0aec0; padding:3rem; }
+  body { background: #0b0f19; color: #f8fafc; font-family: 'Inter', 'Noto Sans KR', sans-serif; }
 </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
 
-<div class="container">
-  <div id="loginView" class="login-box">
-    <h2><i class="fa-solid fa-lock"></i> 어드민 로그인</h2>
-    <input type="password" id="adminPw" placeholder="비밀번호" onkeypress="if(event.key==='Enter')login()">
-    <button onclick="login()">로그인</button>
-    <div id="loginError" style="color:#fc8181;text-align:center;margin-top:1rem;font-size:.9rem;"></div>
-  </div>
-
-  <div id="panelView" style="display:none;">
-    <div class="top-bar">
-      <h1><i class="fa-solid fa-inbox"></i> 문의 관리</h1>
-      <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> 로그아웃</button>
+<!-- LOGIN MODAL (로그인 전) -->
+<div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+  <div class="bg-[#151c2c] border border-slate-700/80 rounded-2xl max-w-md w-full p-8 shadow-2xl">
+    <div class="text-center mb-6">
+      <div class="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center mx-auto mb-3 text-white text-xl shadow-lg shadow-indigo-500/30">
+        <i class="fa-solid fa-lock"></i>
+      </div>
+      <h2 class="text-xl font-bold text-white">관리자 인증</h2>
+      <p class="text-xs text-slate-400 mt-1">DEV BOT 관리자 계정으로 로그인해 주세요.</p>
     </div>
-    <div id="inquiryList"></div>
+
+    <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">아이디</label>
+        <input type="text" id="adminId" required placeholder="관리자 아이디" class="w-full bg-[#0b0f19] border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1">비밀번호</label>
+        <input type="password" id="adminPw" required placeholder="관리자 비밀번호" class="w-full bg-[#0b0f19] border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+      </div>
+      <div id="loginError" class="hidden text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg p-2.5 text-center"></div>
+      <button type="submit" class="w-full py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition-all shadow-md shadow-indigo-600/30">
+        대시보드 로그인
+      </button>
+    </form>
   </div>
 </div>
 
+<!-- DASHBOARD (로그인 후) -->
+<div id="dashboardArea" class="hidden flex-1 flex flex-col">
+  <!-- Topbar -->
+  <header class="border-b border-slate-800 bg-[#151c2c]/80 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-40">
+    <div class="flex items-center gap-3">
+      <span class="px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-xs font-bold">ADMIN PANEL</span>
+      <h1 class="text-lg font-bold text-white">DEV BOT 통합 관리 대시보드</h1>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-xs text-slate-400"><i class="fa-solid fa-circle-user text-emerald-400 mr-1"></i> gusdnr0216 (최고관리자)</span>
+      <button onclick="adminLogout()" class="text-xs text-red-400 hover:text-red-300 border border-slate-700 hover:border-red-500/40 rounded-lg px-3 py-1.5 transition-colors">
+        로그아웃
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 space-y-8">
+    
+    <!-- 통계 카드 (접속 및 문의 현황) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <div class="bg-[#151c2c] border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-2xl">
+          <i class="fa-solid fa-inbox"></i>
+        </div>
+        <div>
+          <div class="text-xs text-slate-400">총 문의 접수</div>
+          <div id="statTotalInquiries" class="text-2xl font-extrabold text-white mt-0.5">0건</div>
+        </div>
+      </div>
+
+      <div class="bg-[#151c2c] border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-2xl">
+          <i class="fa-solid fa-users"></i>
+        </div>
+        <div>
+          <div class="text-xs text-slate-400">접속/로그인 유저</div>
+          <div id="statActiveUsers" class="text-2xl font-extrabold text-white mt-0.5">0명</div>
+        </div>
+      </div>
+
+      <div class="bg-[#151c2c] border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-2xl">
+          <i class="fa-solid fa-paper-plane"></i>
+        </div>
+        <div>
+          <div class="text-xs text-slate-400">답변 완료율</div>
+          <div id="statReplyRate" class="text-2xl font-extrabold text-white mt-0.5">100%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 문의 관리 및 실시간 DM 답장 섹션 -->
+    <div class="bg-[#151c2c] border border-slate-800 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-lg font-bold text-white">접수된 문의 내역 및 답장 발송</h2>
+          <p class="text-xs text-slate-400 mt-0.5">답변을 작성해 [DM 발송]을 누르면 디스코드 봇이 해당 유저에게 개인 DM으로 답장을 보냅니다.</p>
+        </div>
+        <button onclick="loadAdminData()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 flex items-center gap-1.5 transition-all">
+          <i class="fa-solid fa-rotate-right"></i> 새로고침
+        </button>
+      </div>
+
+      <div id="inquiryTableContainer" class="space-y-4">
+        <div class="text-center py-12 text-slate-500 text-sm">
+          <i class="fa-solid fa-spinner fa-spin mr-2"></i> 데이터를 불러오고 있습니다...
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
 <script>
-async function login() {
-  const password = document.getElementById('adminPw').value;
-  const res = await fetch('/api/admin/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ password })
-  });
-  if (res.ok) {
-    showPanel();
+let adminToken = sessionStorage.getItem('devbot_admin_auth');
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (adminToken === 'authorized') {
+    showDashboard();
+  }
+});
+
+// 어드민 로그인 핸들러 (아이디: gusdnr0216 / 비번: gusdnr0216!)
+async function handleAdminLogin(e) {
+  e.preventDefault();
+  const id = document.getElementById('adminId').value.trim();
+  const pw = document.getElementById('adminPw').value.trim();
+  const errorEl = document.getElementById('loginError');
+
+  if (id === 'gusdnr0216' && pw === 'gusdnr0216!') {
+    sessionStorage.setItem('devbot_admin_auth', 'authorized');
+    errorEl.classList.add('hidden');
+    showDashboard();
   } else {
-    document.getElementById('loginError').textContent = '비밀번호가 올바르지 않습니다.';
+    errorEl.textContent = '아이디 또는 비밀번호가 일치하지 않습니다.';
+    errorEl.classList.remove('hidden');
   }
 }
 
-function logout() {
-  location.href = '/api/admin/logout';
+function showDashboard() {
+  document.getElementById('loginModal').classList.add('hidden');
+  document.getElementById('dashboardArea').classList.remove('hidden');
+  loadAdminData();
 }
 
-async function showPanel() {
-  document.getElementById('loginView').style.display = 'none';
-  document.getElementById('panelView').style.display = 'block';
-  loadInquiries();
+function adminLogout() {
+  sessionStorage.removeItem('devbot_admin_auth');
+  location.reload();
 }
 
-async function loadInquiries() {
-  const res = await fetch('/api/admin/inquiries', { credentials: 'include' });
-  if (!res.ok) { location.reload(); return; }
-  const { inquiries } = await res.json();
-  const list = document.getElementById('inquiryList');
+// 어드민 문의 내역 불러오기
+async function loadAdminData() {
+  const container = document.getElementById('inquiryTableContainer');
+  try {
+    const res = await fetch('/api/admin?action=list');
+    if (!res.ok) throw new Error();
+    const data = await res.json();
 
-  if (!inquiries.length) {
-    list.innerHTML = '<div class="empty">아직 문의가 없습니다.</div>';
+    const list = data.inquiries || [];
+    document.getElementById('statTotalInquiries').textContent = `${list.length}건`;
+
+    // 유니크 유저 수 카운트
+    const uniqueUsers = new Set(list.map(i => i.user_id)).size;
+    document.getElementById('statActiveUsers').textContent = `${uniqueUsers}명`;
+
+    if (list.length === 0) {
+      container.innerHTML = `<div class="text-center py-12 text-slate-500 text-sm">접수된 문의가 아직 없습니다.</div>`;
+      return;
+    }
+
+    container.innerHTML = list.map(item => `
+      <div class="bg-[#0b0f19] border border-slate-800 rounded-xl p-5 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+          <div class="flex items-center gap-2.5">
+            <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">${item.category}</span>
+            <span class="font-bold text-sm text-white">${item.global_name || item.username}</span>
+            <span class="text-xs text-slate-400 font-mono">(@${item.username} / ID: ${item.user_id})</span>
+          </div>
+          <span class="text-xs text-slate-500">${new Date(item.created_at).toLocaleString('ko-KR')}</span>
+        </div>
+
+        <div class="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">${item.content}</div>
+
+        <div class="text-xs text-slate-400 bg-slate-900/80 p-2.5 rounded-lg flex items-center justify-between">
+          <span><strong>희망 예산:</strong> ${item.budget || '미정/협의'}</span>
+          <span class="text-emerald-400"><i class="fa-solid fa-circle-check text-[10px]"></i> 접수 완료</span>
+        </div>
+
+        <!-- DM 답장 입력 영역 -->
+        <div class="pt-2 border-t border-slate-800/60 flex flex-col sm:flex-row gap-2">
+          <input type="text" id="reply_input_${item.id}" placeholder="해당 유저에게 보낼 디스코드 DM 답변 내용을 입력하세요..." class="flex-1 bg-[#151c2c] border border-slate-700 rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+          <button onclick="sendDiscordDm('${item.id}', '${item.user_id}', '${item.global_name || item.username}')" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>DM 답변 발송</span>
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+  } catch (e) {
+    container.innerHTML = `<div class="text-center py-10 text-red-400 text-sm">데이터를 불러오는 중 오류가 발생했습니다.</div>`;
+  }
+}
+
+// 디스코드 봇을 통한 유저 DM 발송
+async function sendDiscordDm(inquiryId, userId, userName) {
+  const input = document.getElementById(`reply_input_${inquiryId}`);
+  const replyMessage = input.value.trim();
+
+  if (!replyMessage) {
+    alert('답변 내용을 입력해 주세요.');
     return;
   }
 
-  list.innerHTML = inquiries.map(q => `
-    <div class="inquiry-card ${q.status === 'replied' ? 'replied' : ''}">
-      <div class="inquiry-header">
-        <div class="user">
-          <img src="${q.avatar ? `https://cdn.discordapp.com/avatars/${q.user_id}/${q.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'}">
-          <div>
-            <div class="name">${q.global_name || q.username}</div>
-            <div class="id">@${q.username} · ID #${q.id}</div>
-          </div>
-        </div>
-        <span class="badge ${q.status}">${q.status === 'pending' ? '대기중' : '답변완료'}</span>
-      </div>
-      <div class="content">${escapeHtml(q.content)}</div>
-      ${q.reply ? `<div class="content" style="border-left:3px solid #48bb78;">📬 답변: ${escapeHtml(q.reply)}</div>` : ''}
-      ${q.status === 'pending' ? `
-        <div class="reply-box">
-          <textarea id="reply-${q.id}" placeholder="답변 내용을 입력하세요 (디스코드 DM으로 전송됩니다)"></textarea>
-          <button onclick="sendReply(${q.id})"><i class="fa-solid fa-paper-plane"></i> 답변 전송</button>
-        </div>
-      ` : ''}
-      <div class="timestamp">${new Date(q.created_at).toLocaleString('ko-KR')}</div>
-    </div>
-  `).join('');
-}
+  if (!confirm(`${userName}님에게 디스코드 DM으로 답변을 전송하시겠습니까?`)) return;
 
-async function sendReply(id) {
-  const reply = document.getElementById(`reply-${id}`).value.trim();
-  if (!reply) { alert('답변 내용을 입력하세요.'); return; }
-  const res = await fetch('/api/admin/reply', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ id, reply })
-  });
-  if (res.ok) {
-    alert('답변이 전송되었습니다!');
-    loadInquiries();
-  } else {
-    alert('전송 실패');
+  try {
+    const res = await fetch('/api/admin?action=reply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        inquiryId,
+        userId,
+        reply: replyMessage
+      })
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert('✅ 유저 디스코드 DM으로 답변이 성공적으로 발송되었습니다!');
+      input.value = '';
+    } else {
+      alert('❌ DM 발송 실패: ' + (data.error || '알 수 없는 오류'));
+    }
+  } catch (err) {
+    alert('❌ 통신 오류 발생');
   }
 }
-
-function escapeHtml(str) {
-  return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-
-// 자동 로그인 확인
-fetch('/api/admin/inquiries', { credentials: 'include' })
-  .then(r => { if (r.ok) showPanel(); })
-  .catch(() => {});
 </script>
 
 </body>
