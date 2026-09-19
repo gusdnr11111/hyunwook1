@@ -18,18 +18,36 @@ html { scroll-behavior: smooth; }
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter','Noto Sans KR',sans-serif; }
 body { background:var(--bg-color); color:var(--text-main); line-height:1.6; overflow-x:hidden; }
 a { text-decoration:none; color:inherit; }
-nav { display:flex; justify-content:space-between; align-items:center; padding:1.5rem 5%; position:fixed; width:100%; top:0; z-index:1000; background:rgba(11,15,25,0.85); backdrop-filter:blur(10px); border-bottom:1px solid var(--border-color); }
+
+/* NAV */
+nav { display:flex; justify-content:space-between; align-items:center; padding:1.2rem 5%; position:fixed; width:100%; top:0; z-index:1000; background:rgba(11,15,25,0.85); backdrop-filter:blur(10px); border-bottom:1px solid var(--border-color); }
 .logo { font-size:1.4rem; font-weight:700; color:var(--primary); display:flex; align-items:center; gap:10px; }
 .logo i { color:var(--accent); }
+.nav-right { display:flex; align-items:center; gap:2rem; }
 .nav-links { display:flex; gap:2rem; }
 .nav-links a { font-weight:600; color:var(--text-sub); transition:color .3s; }
 .nav-links a:hover { color:var(--primary); }
+
+/* 네비 로그인 영역 */
+.nav-login-btn { padding:.5rem 1.2rem; background:var(--primary); color:#fff; border-radius:8px; font-weight:600; font-size:.9rem; cursor:pointer; border:none; display:inline-flex; align-items:center; gap:8px; transition:all .3s; }
+.nav-login-btn:hover { background:var(--primary-hover); transform:translateY(-1px); }
+.nav-user { display:flex; align-items:center; gap:.7rem; padding:.4rem .9rem .4rem .4rem; background:var(--card-bg); border:1px solid var(--border-color); border-radius:30px; cursor:pointer; transition:all .3s; position:relative; }
+.nav-user:hover { border-color:var(--primary); }
+.nav-user img { width:32px; height:32px; border-radius:50%; border:2px solid var(--primary); }
+.nav-user .name { font-size:.9rem; font-weight:600; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.nav-user .dropdown { position:absolute; top:calc(100% + 8px); right:0; background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; min-width:160px; padding:.4rem; display:none; box-shadow:0 10px 30px rgba(0,0,0,.4); }
+.nav-user:hover .dropdown, .nav-user.active .dropdown { display:block; }
+.nav-user .dropdown a { display:flex; align-items:center; gap:10px; padding:.6rem .9rem; border-radius:6px; font-size:.88rem; color:var(--text-sub); transition:all .2s; }
+.nav-user .dropdown a:hover { background:rgba(88,101,242,.1); color:var(--primary); }
+
+/* HERO */
 .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:0 5%; position:relative; background:radial-gradient(circle at top right, rgba(88,101,242,.18), transparent 40%), radial-gradient(circle at bottom left, rgba(0,212,255,.12), transparent 40%); }
 .hero .badge { display:inline-block; padding:.4rem 1rem; border:1px solid var(--accent); color:var(--accent); border-radius:20px; font-size:.85rem; margin-bottom:1.5rem; font-weight:600; letter-spacing:1px; }
 .hero h1 { font-size:3.6rem; font-weight:700; margin-bottom:1rem; line-height:1.2; background:linear-gradient(90deg,#fff,#a0aec0); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 .hero .tagline { font-size:1.6rem; font-weight:700; margin-bottom:1rem; background:linear-gradient(90deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 .hero p { font-size:1.15rem; color:var(--text-sub); max-width:720px; margin-bottom:2rem; }
 .hero-buttons { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; }
+
 .btn { padding:.85rem 2rem; border-radius:8px; font-weight:600; font-size:1rem; cursor:pointer; transition:all .3s ease; display:inline-flex; align-items:center; gap:10px; border:none; }
 .btn-primary { background:var(--primary); color:#fff; }
 .btn-primary:hover { background:var(--primary-hover); transform:translateY(-2px); box-shadow:0 10px 20px rgba(88,101,242,.3); }
@@ -37,6 +55,7 @@ nav { display:flex; justify-content:space-between; align-items:center; padding:1
 .btn-outline:hover { background:var(--card-bg); border-color:var(--primary); transform:translateY(-2px); }
 .btn-telegram { background:var(--telegram); color:#fff; }
 .btn-telegram:hover { background:var(--telegram-hover); transform:translateY(-2px); }
+
 .section { padding:6rem 5%; max-width:1200px; margin:0 auto; }
 .section-title { font-size:2.5rem; font-weight:700; margin-bottom:.8rem; text-align:center; }
 .section-title span { color:var(--primary); }
@@ -54,6 +73,7 @@ nav { display:flex; justify-content:space-between; align-items:center; padding:1
 .tag { background:rgba(88,101,242,.12); color:var(--primary); padding:.3rem .8rem; border-radius:20px; font-size:.8rem; font-weight:600; }
 .notice-banner { max-width:1000px; margin:0 auto 2rem; padding:1.2rem 1.5rem; background:rgba(246,173,85,.08); border:1px solid rgba(246,173,85,.4); border-radius:12px; color:var(--warning); font-size:.95rem; display:flex; align-items:center; gap:12px; }
 .copyright-banner { max-width:1000px; margin:2rem auto 0; padding:1.2rem 1.5rem; background:rgba(252,129,129,.08); border:1px solid rgba(252,129,129,.4); border-radius:12px; color:var(--danger); font-size:.9rem; text-align:center; }
+
 .pricing-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1.5rem; }
 .pricing-card { background:var(--card-bg); border:1px solid var(--border-color); border-radius:16px; padding:2.2rem 1.8rem; text-align:center; transition:all .3s ease; }
 .pricing-card:hover { transform:translateY(-5px); border-color:var(--accent); }
@@ -64,29 +84,24 @@ nav { display:flex; justify-content:space-between; align-items:center; padding:1
 .pricing-card ul li { color:var(--text-sub); margin-bottom:.7rem; display:flex; align-items:center; gap:10px; font-size:.9rem; }
 .pricing-card ul li i { color:var(--accent); }
 .pricing-card .btn { width:100%; justify-content:center; }
+
 .contact-section { text-align:center; background:linear-gradient(135deg, rgba(88,101,242,.12), rgba(0,212,255,.06)); border-radius:24px; padding:4rem 2rem; border:1px solid var(--border-color); }
 .contact-section h2 { font-size:2.3rem; margin-bottom:1rem; }
 .contact-section p { color:var(--text-sub); margin-bottom:2rem; max-width:640px; margin-left:auto; margin-right:auto; }
 .contact-buttons { display:flex; justify-content:center; gap:1rem; flex-wrap:wrap; }
-/* 로그인 & 문의 폼 */
-.auth-box { max-width:600px; margin:2rem auto 0; padding:2rem; background:var(--card-bg); border:1px solid var(--border-color); border-radius:16px; text-align:left; }
+
+.auth-box { max-width:600px; margin:2rem auto 0; padding:2rem; background:var(--card-bg); border:1px solid var(--border-color); border-radius:16px; text-align:left; scroll-margin-top:100px; }
 .auth-box h3 { font-size:1.3rem; margin-bottom:1rem; text-align:center; }
-.user-info { display:flex; align-items:center; gap:1rem; padding:1rem; background:rgba(88,101,242,.1); border-radius:12px; margin-bottom:1.5rem; }
-.user-info img { width:48px; height:48px; border-radius:50%; border:2px solid var(--primary); }
-.user-info .name { font-weight:600; font-size:1.1rem; }
-.user-info .tag { color:var(--text-sub); font-size:.85rem; }
 .form-group { margin-bottom:1.2rem; }
 .form-group label { display:block; font-size:.9rem; color:var(--text-sub); margin-bottom:.5rem; font-weight:600; }
-.form-group input, .form-group textarea { width:100%; padding:.9rem 1rem; background:var(--bg-color); border:1px solid var(--border-color); border-radius:8px; color:var(--text-main); font-size:1rem; font-family:inherit; resize:vertical; }
-.form-group input:focus, .form-group textarea:focus { outline:none; border-color:var(--primary); }
-.form-group textarea { min-height:120px; }
+.form-group textarea { width:100%; padding:.9rem 1rem; background:var(--bg-color); border:1px solid var(--border-color); border-radius:8px; color:var(--text-main); font-size:1rem; font-family:inherit; resize:vertical; min-height:120px; }
+.form-group textarea:focus { outline:none; border-color:var(--primary); }
 .status-msg { padding:.8rem 1rem; border-radius:8px; margin-top:1rem; font-size:.9rem; display:none; }
 .status-msg.success { background:rgba(72,187,120,.15); color:#48bb78; border:1px solid rgba(72,187,120,.4); display:block; }
 .status-msg.error { background:rgba(252,129,129,.15); color:var(--danger); border:1px solid rgba(252,129,129,.4); display:block; }
+
 footer { text-align:center; padding:2rem; color:var(--text-sub); border-top:1px solid var(--border-color); font-size:.85rem; }
-footer .footer-links { display:flex; justify-content:center; gap:1.5rem; margin-top:1rem; flex-wrap:wrap; }
-footer .footer-links a { color:var(--text-sub); }
-footer .footer-links a:hover { color:var(--primary); }
+
 @media (max-width:768px) {
   .hero h1 { font-size:2.2rem; } .hero .tagline { font-size:1.2rem; }
   .nav-links { display:none; } .hero-buttons { flex-direction:column; width:100%; }
@@ -98,10 +113,18 @@ footer .footer-links a:hover { color:var(--primary); }
 
 <nav>
   <div class="logo"><i class="fa-brands fa-discord"></i> DEV BOT</div>
-  <div class="nav-links">
-    <a href="#portfolio">포트폴리오</a>
-    <a href="#pricing">가격표</a>
-    <a href="#contact">문의하기</a>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="#portfolio">포트폴리오</a>
+      <a href="#pricing">가격표</a>
+      <a href="#contact">문의하기</a>
+    </div>
+    <!-- 로그인 상태에 따라 여기가 바뀜 -->
+    <div id="navAuthArea">
+      <button class="nav-login-btn" onclick="discordLogin()">
+        <i class="fa-brands fa-discord"></i> 로그인
+      </button>
+    </div>
   </div>
 </nav>
 
@@ -188,7 +211,6 @@ footer .footer-links a:hover { color:var(--primary); }
     <h2>프로젝트를 시작해 보세요</h2>
     <p>디스코드로 로그인하고 문의를 남겨주세요.<br>빠르게 상담해 드리겠습니다.</p>
 
-    <!-- 로그인 & 문의 폼 -->
     <div class="auth-box" id="authBox">
       <h3><i class="fa-brands fa-discord"></i> 디스코드 로그인 후 문의하기</h3>
       <div id="loginSection">
@@ -201,13 +223,12 @@ footer .footer-links a:hover { color:var(--primary); }
       </div>
 
       <div id="userSection" style="display:none;">
-        <div class="user-info">
-          <img id="userAvatar" src="" alt="avatar">
+        <div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:rgba(88,101,242,.1);border-radius:12px;margin-bottom:1.5rem;">
+          <img id="userAvatar" src="" alt="avatar" style="width:48px;height:48px;border-radius:50%;border:2px solid var(--primary);">
           <div>
-            <div class="name" id="userName"></div>
-            <div class="tag" id="userTag"></div>
+            <div class="name" id="userName" style="font-weight:600;font-size:1.1rem;"></div>
+            <div class="tag" id="userTag" style="color:var(--text-sub);font-size:.85rem;"></div>
           </div>
-          <button class="btn btn-outline" style="margin-left:auto;padding:.5rem 1rem;font-size:.85rem;" onclick="logout()">로그아웃</button>
         </div>
         <div class="form-group">
           <label>문의 내용</label>
@@ -232,7 +253,6 @@ footer .footer-links a:hover { color:var(--primary); }
 </footer>
 
 <script>
-const API_BASE = '';  // 같은 도메인이므로 비워둠
 let currentUser = null;
 
 // 페이지 로드 시 세션 확인
@@ -243,7 +263,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       const data = await res.json();
       if (data.user) {
         currentUser = data.user;
-        showUserSection(data.user);
+        renderUser(data.user);
       }
     }
   } catch (e) { console.error(e); }
@@ -258,14 +278,43 @@ function logout() {
     .then(() => location.reload());
 }
 
-function showUserSection(user) {
-  document.getElementById('loginSection').style.display = 'none';
-  document.getElementById('userSection').style.display = 'block';
-  document.getElementById('userName').textContent = user.global_name || user.username;
-  document.getElementById('userTag').textContent = '@' + user.username;
-  document.getElementById('userAvatar').src = user.avatar
+// 로그인 상태에 따라 UI 렌더링
+function renderUser(user) {
+  const displayName = user.global_name || user.username;
+  const avatarUrl = user.avatar
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
     : 'https://cdn.discordapp.com/embed/avatars/0.png';
+
+  // 1. 네비게이션 바 우측
+  document.getElementById('navAuthArea').innerHTML = `
+    <div class="nav-user" onclick="this.classList.toggle('active')">
+      <img src="${avatarUrl}" alt="avatar">
+      <span class="name">${displayName}</span>
+      <i class="fa-solid fa-chevron-down" style="font-size:.7rem;color:var(--text-sub);"></i>
+      <div class="dropdown">
+        <a href="#contact"><i class="fa-solid fa-paper-plane"></i> 문의하기</a>
+        <a href="javascript:logout()"><i class="fa-solid fa-right-from-bracket"></i> 로그아웃</a>
+      </div>
+    </div>
+  `;
+
+  // 2. 문의 섹션
+  document.getElementById('loginSection').style.display = 'none';
+  document.getElementById('userSection').style.display = 'block';
+  document.getElementById('userName').textContent = displayName;
+  document.getElementById('userTag').textContent = '@' + user.username;
+  document.getElementById('userAvatar').src = avatarUrl;
+
+  // 3. URL에 ?login=success 있으면 문의 폼으로 자동 스크롤
+  if (window.location.search.includes('login=success') || sessionStorage.getItem('justLoggedIn')) {
+    sessionStorage.removeItem('justLoggedIn');
+    setTimeout(() => {
+      document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => {
+        document.getElementById('inquiryContent')?.focus();
+      }, 800);
+    }, 300);
+  }
 }
 
 async function submitInquiry() {
