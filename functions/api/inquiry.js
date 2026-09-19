@@ -1,25 +1,9 @@
 export async function onRequestPost({ request, env }) {
   try {
-    const { category, content, budget, user: bodyUser } = await request.json();
-
-    // 1. 유저 정보 확인 (본문 전달 유저 우선, 차선으로 쿠키 확인)
-    let user = bodyUser;
-    if (!user) {
-      const cookieHeader = request.headers.get('Cookie') || '';
-      const match = cookieHeader.match(/(?:^|;\s*)devbot_session=([^;]+)/);
-      if (match && match[1]) {
-        try {
-          user = JSON.parse(decodeURIComponent(escape(atob(match[1]))));
-        } catch (e) {
-          try {
-            user = JSON.parse(decodeURIComponent(match[1]));
-          } catch (e2) {}
-        }
-      }
-    }
+    const { category, content, budget, user } = await request.json();
 
     if (!user || !user.id) {
-      return new Response(JSON.stringify({ error: '로그인 세션 정보가 없습니다. 다시 로그인해 주세요.' }), {
+      return new Response(JSON.stringify({ error: '로그인 정보가 없습니다. 다시 로그인해 주세요.' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -32,83 +16,54 @@ export async function onRequestPost({ request, env }) {
       });
     }
 
-    // 2. D1 데이터베이스 저장
+    // 1. D1 데이터베이스에 문의 저장 (어드민 패널에서 조회할 데이터)
     if (env.DB) {
       try {
         await env.DB.prepare(
-          `INSERT INTO inquiries (user_id, username, global_name, category, content, budget, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+          `INSERT INTO inquiries (user_id, username, global_name, category, content, budget, status, created_at) 
+           VALUES (?, ?, ?, ?, ?, ?, '대기중', datetime('now', '+9 hours'))`
         ).bind(
-          user.id,
-          user.username,
-          user.global_name || user.username,
+          String(user.id),
+          user.username || '',
+          user.global_name || user.username || '',
           category || '기타',
           content,
-          budget || '미정/협의',
-          new Date().toISOString()
+          budget || '미정/협의'
         ).run();
       } catch (dbErr) {
         console.error('DB 저장 실패:', dbErr);
       }
     }
 
-    // 3. 디스코드 채널로 봇을 통해 임베드 전송
+    // 2. 디스코드 채널 알림 발송
     const channelId = env.DISCORD_CHANNEL_ID ? String(env.DISCORD_CHANNEL_ID).trim() : '1550831898505253014';
     const botToken = env.DISCORD_BOT_TOKEN ? env.DISCORD_BOT_TOKEN.trim() : '';
 
-    if (!botToken) {
-      return new Response(JSON.stringify({ error: '서버 봇 토큰(DISCORD_BOT_TOKEN)이 설정되지 않았습니다.' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+    if (botToken) {
+      const avatarUrl = user.avatar
+        ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+        : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
-    const avatarUrl = user.avatar
-      ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-      : 'https://cdn.discordapp.com/embed/avatars/0.png';
-
-    const discordPayload = {
-      embeds: [
-        {
-          title: `📬 새로운 문의가 접수되었습니다! [${category}]`,
-          color: 0x5865F2,
-          fields: [
-            {
-              name: '👤 신청자',
-              value: `${user.global_name || user.username} (<@${user.id}> / \`${user.username}\`)`,
-              inline: true
-            },
-            {
-              name: '💰 희망 예산',
-              value: budget || '미정/협의',
-              inline: true
-            },
-            {
-              name: '📝 문의 상세 내용',
-              value: content.length > 1000 ? content.slice(0, 1000) + '...' : content,
-              inline: false
-            }
-          ],
-          thumbnail: { url: avatarUrl },
-          footer: { text: `User ID: ${user.id}` },
-          timestamp: new Date().toISOString()
-        }
-      ]
-    };
-
-    const discordRes = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bot ${botToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(discordPayload)
-    });
-
-    if (!discordRes.ok) {
-      const errDetail = await discordRes.text();
-      return new Response(JSON.stringify({ error: `디스코드 채널 전송 실패: ${errDetail}` }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
+      await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bot ${botToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          embeds: [{
+            title: `📬 새로운 문의가 접수되었습니다! [${category}]`,
+            color: 0x5865F2,
+            fields: [
+              { name: '👤 신청자', value: `${user.global_name || user.username} (<@${user.id}>)`, inline: true },
+              { name: '💰 희망 예산', value: budget || '미정/협의', inline: true },
+              { name: '📝 내용', value: content.length > 900 ? content.slice(0, 900) + '...' : content }
+            ],
+            thumbnail: { url: avatarUrl },
+            footer: { text: `User ID: ${user.id}` },
+            timestamp: new Date().toISOString()
+          }]
+        })
       });
     }
 
@@ -118,7 +73,7 @@ export async function onRequestPost({ request, env }) {
     });
 
   } catch (err) {
-    return new Response(JSON.stringify({ error: `서버 오류: ${err.message}` }), {
+    return new Response(JSON.stringify({ error: `서버 처리 에러: ${err.message}` }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
