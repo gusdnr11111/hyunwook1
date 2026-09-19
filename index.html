@@ -36,7 +36,7 @@ nav { display:flex; justify-content:space-between; align-items:center; padding:1
 .nav-user img { width:32px; height:32px; border-radius:50%; border:2px solid var(--primary); }
 .nav-user .name { font-size:.9rem; font-weight:600; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .nav-user .dropdown { position:absolute; top:calc(100% + 8px); right:0; background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; min-width:160px; padding:.4rem; display:none; box-shadow:0 10px 30px rgba(0,0,0,.4); }
-.nav-user:hover .dropdown, .nav-user.active .dropdown { display:block; }
+.nav-user.active .dropdown { display:block; }
 .nav-user .dropdown a { display:flex; align-items:center; gap:10px; padding:.6rem .9rem; border-radius:6px; font-size:.88rem; color:var(--text-sub); transition:all .2s; }
 .nav-user .dropdown a:hover { background:rgba(88,101,242,.1); color:var(--primary); }
 
@@ -119,7 +119,6 @@ footer { text-align:center; padding:2rem; color:var(--text-sub); border-top:1px 
       <a href="#pricing">가격표</a>
       <a href="#contact">문의하기</a>
     </div>
-    <!-- 로그인 상태에 따라 여기가 바뀜 -->
     <div id="navAuthArea">
       <button class="nav-login-btn" onclick="discordLogin()">
         <i class="fa-brands fa-discord"></i> 로그인
@@ -169,7 +168,7 @@ footer { text-align:center; padding:2rem; color:var(--text-sub); border-top:1px 
       <div class="card-icon"><i class="fa-solid fa-receipt"></i></div>
       <h3>🚀 결제 / 영수증 봇</h3>
       <p>디스코드 내에서 <strong>결제 정보를 자동으로 생성하고 영수증을 발급</strong>해 주는 봇입니다.</p>
-      <div class="screenshot-row" style="display:flex;gap:.6rem;margin:1rem 0;flex-wrap:wrap;">
+      <div style="display:flex;gap:.6rem;margin:1rem 0;flex-wrap:wrap;">
         <img src="receipt1.png" alt="결제 정보" style="width:80px;border-radius:8px;border:1px solid var(--border-color);">
         <img src="receipt2.png" alt="영수증" style="width:80px;border-radius:8px;border:1px solid var(--border-color);">
         <img src="receipt3.png" alt="영수증 상세" style="width:80px;border-radius:8px;border:1px solid var(--border-color);">
@@ -226,8 +225,8 @@ footer { text-align:center; padding:2rem; color:var(--text-sub); border-top:1px 
         <div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:rgba(88,101,242,.1);border-radius:12px;margin-bottom:1.5rem;">
           <img id="userAvatar" src="" alt="avatar" style="width:48px;height:48px;border-radius:50%;border:2px solid var(--primary);">
           <div>
-            <div class="name" id="userName" style="font-weight:600;font-size:1.1rem;"></div>
-            <div class="tag" id="userTag" style="color:var(--text-sub);font-size:.85rem;"></div>
+            <div id="userName" style="font-weight:600;font-size:1.1rem;"></div>
+            <div id="userTag" style="color:var(--text-sub);font-size:.85rem;"></div>
           </div>
         </div>
         <div class="form-group">
@@ -255,6 +254,17 @@ footer { text-align:center; padding:2rem; color:var(--text-sub); border-top:1px 
 <script>
 let currentUser = null;
 
+// 드롭다운 토글
+document.addEventListener('click', function(e) {
+  const navUser = document.querySelector('.nav-user');
+  if (!navUser) return;
+  if (navUser.contains(e.target)) {
+    navUser.classList.toggle('active');
+  } else {
+    navUser.classList.remove('active');
+  }
+});
+
 // 페이지 로드 시 세션 확인
 window.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -278,7 +288,6 @@ function logout() {
     .then(() => location.reload());
 }
 
-// 로그인 상태에 따라 UI 렌더링
 function renderUser(user) {
   const displayName = user.global_name || user.username;
   const avatarUrl = user.avatar
@@ -287,7 +296,7 @@ function renderUser(user) {
 
   // 1. 네비게이션 바 우측
   document.getElementById('navAuthArea').innerHTML = `
-    <div class="nav-user" onclick="this.classList.toggle('active')">
+    <div class="nav-user">
       <img src="${avatarUrl}" alt="avatar">
       <span class="name">${displayName}</span>
       <i class="fa-solid fa-chevron-down" style="font-size:.7rem;color:var(--text-sub);"></i>
@@ -305,13 +314,19 @@ function renderUser(user) {
   document.getElementById('userTag').textContent = '@' + user.username;
   document.getElementById('userAvatar').src = avatarUrl;
 
-  // 3. URL에 ?login=success 있으면 문의 폼으로 자동 스크롤
-  if (window.location.search.includes('login=success') || sessionStorage.getItem('justLoggedIn')) {
-    sessionStorage.removeItem('justLoggedIn');
+  // 3. 로그인 직후 문의 폼으로 자동 스크롤
+  if (window.location.search.includes('login=success')) {
+    // URL에서 ?login=success 제거 (뒤로가기 시 재실행 방지)
+    history.replaceState({}, '', window.location.pathname);
+    
     setTimeout(() => {
-      document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+      const contactSection = document.getElementById('contact');
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
       setTimeout(() => {
-        document.getElementById('inquiryContent')?.focus();
+        const textarea = document.getElementById('inquiryContent');
+        if (textarea) textarea.focus();
       }, 800);
     }, 300);
   }
