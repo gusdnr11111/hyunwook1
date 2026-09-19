@@ -6,7 +6,7 @@
 <title>DEV BOT | Discord Bot Developer Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -30,564 +30,284 @@
 
 <style>
   html { scroll-behavior: smooth; }
-  :root {
-    --bg-color: #0b0f19;
-    --card-bg: #151c2c;
-    --primary: #5865F2;
-    --primary-hover: #4752C4;
-    --telegram: #229ED9;
-    --telegram-hover: #1b8dc4;
-    --text-main: #ffffff;
-    --text-sub: #94a3b8;
-    --border-color: #232f48;
-    --accent: #00d4ff;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --success: #10b981;
-  }
-  * { box-sizing: border-box; font-family: 'Inter', 'Noto Sans KR', sans-serif; }
-  body { background: var(--bg-color); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
-
-  ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-track { background: #0b0f19; }
-  ::-webkit-scrollbar-thumb { background: #232f48; border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: #5865F2; }
-
-  .glow-box {
-    box-shadow: 0 0 25px rgba(88, 101, 242, 0.15);
-  }
-  .glow-box:hover {
-    box-shadow: 0 0 35px rgba(0, 212, 255, 0.25);
-  }
-  .glass-nav {
-    background: rgba(11, 15, 25, 0.88);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+  body { background: #0b0f19; color: #ffffff; font-family: 'Inter', 'Noto Sans KR', sans-serif; overflow-x: hidden; }
+  .glow-box { box-shadow: 0 0 20px rgba(88, 101, 242, 0.12); }
+  .glow-box:hover { box-shadow: 0 0 30px rgba(0, 212, 255, 0.2); }
+  
+  /* 마우스 호버 시 로그아웃 버튼 노출 */
+  .profile-container:hover .logout-dropdown {
+    display: block;
   }
 </style>
 </head>
 <body class="bg-dark-bg text-slate-100 min-h-screen flex flex-col">
 
-<nav class="glass-nav fixed top-0 w-full z-50 border-b border-accent-border transition-all">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between py-3">
-    <!-- Brand Logo -->
-    <a href="#" class="flex items-center gap-2.5 text-xl font-bold tracking-tight text-white group">
-      <div class="w-10 h-10 rounded-xl bg-discord flex items-center justify-center text-white shadow-lg shadow-discord/30 group-hover:scale-105 transition-transform">
-        <i class="fa-brands fa-discord text-xl"></i>
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 border-b border-accent-border bg-[#0b0f19]/90 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2 text-xl font-bold tracking-tight text-white">
+      <div class="w-9 h-9 rounded-xl bg-discord flex items-center justify-center text-white shadow-md shadow-discord/30">
+        <i class="fa-brands fa-discord text-lg"></i>
       </div>
-      <span class="text-white font-extrabold text-lg">DEV <span class="text-accent-cyan">BOT</span></span>
+      <span>DEV <span class="text-accent-cyan">BOT</span></span>
     </a>
 
-    <!-- Nav links (Desktop) -->
     <div class="hidden md:flex items-center space-x-8 font-medium text-sm text-slate-300">
       <a href="#portfolio" class="hover:text-discord transition-colors">포트폴리오</a>
       <a href="#pricing" class="hover:text-discord transition-colors">가격표</a>
       <a href="#contact" class="hover:text-discord transition-colors">문의하기</a>
-      <a href="#faq" class="hover:text-discord transition-colors">FAQ</a>
     </div>
 
-    <!-- Right Profile / Login Controls -->
-    <div class="flex items-center gap-3">
-      <div id="navAuthArea" class="flex items-center gap-2">
-        <button onclick="discordLogin()" class="px-4 py-2 text-sm font-semibold rounded-lg bg-discord hover:bg-discord-hover text-white flex items-center gap-2 transition-all shadow-md shadow-discord/20 active:scale-95">
-          <i class="fa-brands fa-discord text-base"></i>
-          <span>로그인</span>
-        </button>
-      </div>
-
-      <!-- Mobile Menu Button -->
-      <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="md:hidden p-2 text-slate-400 hover:text-white rounded-lg focus:outline-none">
-        <i class="fa-solid fa-bars text-xl"></i>
+    <!-- 우측 상단 로그인 / 프로필 영역 -->
+    <div id="navAuthArea">
+      <button onclick="discordLogin()" class="px-4 py-2 text-sm font-semibold rounded-lg bg-discord hover:bg-discord-hover text-white flex items-center gap-2 transition-all shadow-md shadow-discord/20">
+        <i class="fa-brands fa-discord text-base"></i>
+        <span>로그인</span>
       </button>
-    </div>
-  </div>
-
-  <!-- Mobile Dropdown Navigation -->
-  <div id="mobileMenu" class="hidden md:hidden px-4 pt-2 pb-4 border-t border-accent-border bg-dark-card/95 backdrop-blur-md">
-    <div class="flex flex-col space-y-3 pt-2 text-slate-300 text-sm font-medium">
-      <a href="#portfolio" onclick="toggleMobileMenu()" class="px-3 py-2 rounded-lg hover:bg-slate-800">포트폴리오</a>
-      <a href="#pricing" onclick="toggleMobileMenu()" class="px-3 py-2 rounded-lg hover:bg-slate-800">가격표</a>
-      <a href="#contact" onclick="toggleMobileMenu()" class="px-3 py-2 rounded-lg hover:bg-slate-800">문의하기</a>
-      <a href="#faq" onclick="toggleMobileMenu()" class="px-3 py-2 rounded-lg hover:bg-slate-800">FAQ</a>
     </div>
   </div>
 </nav>
 
-<header class="relative pt-32 pb-20 md:pt-40 md:pb-32 px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center overflow-hidden">
-  <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-discord/20 rounded-full blur-3xl pointer-events-none -z-10"></div>
-  <div class="absolute top-1/3 left-1/4 w-80 h-80 bg-accent-cyan/15 rounded-full blur-3xl pointer-events-none -z-10"></div>
-
+<!-- HERO -->
+<header class="relative pt-32 pb-20 md:pt-40 md:pb-28 px-4 text-center flex flex-col items-center">
   <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent-cyan/40 bg-accent-cyan/10 text-accent-cyan text-xs sm:text-sm font-semibold tracking-wide mb-6">
     <span class="w-2 h-2 rounded-full bg-accent-cyan animate-pulse"></span>
-    PYTHON · 24/7 DISCORD BOT DEVELOPER
+    PYTHON · DISCORD BOT DEVELOPER
   </div>
-
-  <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white mb-4 leading-tight">
-    디스코드 봇 개발 전문가
-  </h1>
-  <p class="text-xl sm:text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-discord via-cyan-400 to-accent-cyan">
+  <h1 class="text-4xl sm:text-6xl font-extrabold text-white mb-4 leading-tight">디스코드 봇 개발 전문가</h1>
+  <p class="text-xl sm:text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-discord to-accent-cyan">
     디스코드봇을 혁신으로, 고퀄리티의 외주를 만나보세요
   </p>
-  
-  <p class="max-w-2xl text-slate-400 text-base sm:text-lg mb-8 leading-relaxed">
-    서버 활동을 안전하고 편리하게 관리할 수 있도록 지원합니다.<br class="hidden sm:inline">
-    <strong class="text-slate-200">1원 계좌 인증 봇 API</strong>부터 <strong class="text-slate-200">서버 실시간 백업 봇</strong>까지, 모든 봇을 <strong class="text-emerald-400">Python (discord.py)</strong>으로 맞춤 제작해 드립니다.
+  <p class="max-w-2xl text-slate-400 text-base sm:text-lg mb-8">
+    서버 활동을 안전하고 편리하게. <br>
+    <strong class="text-slate-200">1원 계좌 인증 봇</strong>부터 <strong class="text-slate-200">서버 백업 봇</strong>까지 모든 봇을 <strong class="text-emerald-400">Python</strong>으로 직접 제작합니다.
   </p>
-
-  <div class="flex flex-wrap items-center justify-center gap-4 w-full max-w-md">
-    <button onclick="handleContactNavClick()" class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-discord hover:bg-discord-hover text-white font-semibold text-base flex items-center justify-center gap-2 shadow-lg shadow-discord/30 transition-all hover:-translate-y-0.5">
+  <div class="flex flex-wrap justify-center gap-4">
+    <button onclick="handleInquiryClick()" class="px-7 py-3.5 rounded-xl bg-discord hover:bg-discord-hover text-white font-semibold text-base flex items-center gap-2 shadow-lg shadow-discord/30 transition-all">
       <i class="fa-solid fa-paper-plane"></i>
       <span>웹에서 바로 문의하기</span>
     </button>
-    <a href="#pricing" class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-dark-card hover:bg-slate-800 border border-accent-border text-slate-200 font-semibold text-base flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5">
+    <a href="#pricing" class="px-7 py-3.5 rounded-xl bg-dark-card hover:bg-slate-800 border border-accent-border text-slate-200 font-semibold text-base flex items-center gap-2">
       <i class="fa-solid fa-tags text-accent-cyan"></i>
       <span>가격표 보기</span>
     </a>
   </div>
 </header>
 
-<section id="portfolio" class="py-16 sm:py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-  <div class="text-center max-w-3xl mx-auto mb-16">
-    <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-3">
-      개발 <span class="text-discord">포트폴리오</span>
-    </h2>
-    <p class="text-slate-400 text-base">현업에서 안정적으로 운영 중인 검증된 봇 시스템입니다.</p>
+<!-- PORTFOLIO -->
+<section id="portfolio" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="text-center max-w-3xl mx-auto mb-12">
+    <h2 class="text-3xl font-extrabold text-white mb-2">개발 <span class="text-discord">포트폴리오</span></h2>
+    <p class="text-slate-400 text-sm">현업에서 안정적으로 가동 중인 검증된 시스템입니다.</p>
   </div>
-
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-    <div class="glow-box bg-dark-card border border-accent-border rounded-2xl p-7 transition-all flex flex-col justify-between">
-      <div>
-        <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-accent-cyan text-2xl mb-6">
-          <i class="fa-solid fa-shield-halved"></i>
-        </div>
-        <h3 class="text-xl font-bold text-white mb-2">🚀 1원 계좌 인증 봇 API</h3>
-        <p class="text-slate-400 text-sm mb-5 leading-relaxed">
-          서버 회원의 신원을 안전하게 검증하는 <strong>1원 입금 인증</strong> 시스템입니다. 외부 핀테크/은행 조회 API와 연동되어 사기 및 다계정을 완벽 차단합니다.
-        </p>
-        <ul class="space-y-2.5 text-xs sm:text-sm text-slate-300 mb-6">
-          <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-accent-cyan text-xs"></i> 1원 입금 시 4자리 인증번호 실시간 매칭</li>
-          <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-accent-cyan text-xs"></i> 금융결제원 / 은행 계좌 유효성 검사</li>
-          <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-accent-cyan text-xs"></i> 인증 완료 시 지정 역할 자동 부여</li>
-        </ul>
-      </div>
-      <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-800">
-        <span class="px-2.5 py-1 text-xs rounded-md bg-discord/15 text-discord font-semibold">Python</span>
-        <span class="px-2.5 py-1 text-xs rounded-md bg-cyan-500/15 text-cyan-400 font-semibold">Bank API</span>
-        <span class="px-2.5 py-1 text-xs rounded-md bg-slate-800 text-slate-300 font-semibold">본인인증</span>
-      </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="glow-box bg-dark-card border border-accent-border rounded-2xl p-6">
+      <div class="text-accent-cyan text-2xl mb-4"><i class="fa-solid fa-shield-halved"></i></div>
+      <h3 class="text-lg font-bold text-white mb-2">🚀 1원 계좌 인증 봇 API</h3>
+      <p class="text-slate-400 text-xs sm:text-sm mb-4">1원 입금 기반 본인 인증 및 외부 금융/은행 조회 API 연동 솔루션입니다.</p>
+      <div class="text-xs text-discord font-semibold">Python · API 연동 · 보안 인증</div>
     </div>
-
-    <div class="glow-box bg-dark-card border border-accent-border rounded-2xl p-7 transition-all flex flex-col justify-between">
-      <div>
-        <div class="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-2xl mb-6">
-          <i class="fa-solid fa-server"></i>
-        </div>
-        <h3 class="text-xl font-bold text-white mb-2">🚀 서버 백업 및 복구 봇</h3>
-        <p class="text-slate-400 text-sm mb-5 leading-relaxed">
-          예기치 못한 서버 테러나 분실 상황에 대비하여 <strong>채널 권한, 역할, 카테고리, 메시지</strong>를 주기적으로 안전하게 클라우드에 스냅샷 저장합니다.
-        </p>
-        <ul class="space-y-2.5 text-xs sm:text-sm text-slate-300 mb-6">
-          <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-accent-cyan text-xs"></i> 최근 200건 이상 메시지 및 첨부파일 백업</li>
-          <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-accent-cyan text-xs"></i> 전체 역할 순서 및 권한 완벽 복제</li>
-          <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-accent-cyan text-xs"></i> 인가된 최고 관리자만 2FA 인증으로 접근</li>
-        </ul>
-      </div>
-      <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-800">
-        <span class="px-2.5 py-1 text-xs rounded-md bg-discord/15 text-discord font-semibold">Python</span>
-        <span class="px-2.5 py-1 text-xs rounded-md bg-indigo-500/15 text-indigo-400 font-semibold">SQLite / JSON</span>
-        <span class="px-2.5 py-1 text-xs rounded-md bg-slate-800 text-slate-300 font-semibold">백업 솔루션</span>
-      </div>
+    <div class="glow-box bg-dark-card border border-accent-border rounded-2xl p-6">
+      <div class="text-indigo-400 text-2xl mb-4"><i class="fa-solid fa-server"></i></div>
+      <h3 class="text-lg font-bold text-white mb-2">🚀 서버 백업 및 복구 봇</h3>
+      <p class="text-slate-400 text-xs sm:text-sm mb-4">최근 200건 메시지, 역할, 채널 권한을 안전하게 스냅샷 백업합니다.</p>
+      <div class="text-xs text-indigo-400 font-semibold">Python · 백업/복구 · 관리자 한정</div>
     </div>
-
-    <div class="glow-box bg-dark-card border border-accent-border rounded-2xl p-7 transition-all flex flex-col justify-between">
-      <div>
-        <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl mb-6">
-          <i class="fa-solid fa-receipt"></i>
-        </div>
-        <h3 class="text-xl font-bold text-white mb-2">🚀 자동 결제 & 영수증 봇</h3>
-        <p class="text-slate-400 text-sm mb-5 leading-relaxed">
-          커뮤니티 내 재화 및 아이템 판매 시 <strong>결제 링크 자동 생성 및 실시간 결제 완료 영수증</strong>을 디자인 임베드로 즉각 렌더링합니다.
-        </p>
-        <div class="flex items-center gap-2 mb-5">
-          <div class="px-3 py-2 rounded-lg bg-slate-800/80 border border-slate-700 text-xs text-slate-300 flex items-center gap-1.5">
-            <i class="fa-regular fa-file-lines text-amber-400"></i> 영수증 자동출력
-          </div>
-          <div class="px-3 py-2 rounded-lg bg-slate-800/80 border border-slate-700 text-xs text-slate-300 flex items-center gap-1.5">
-            <i class="fa-solid fa-bell text-emerald-400"></i> 관리자 알림
-          </div>
-        </div>
-        <ul class="space-y-2.5 text-xs sm:text-sm text-slate-300 mb-6">
-          <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-accent-cyan text-xs"></i> 문화상품권, 계좌이체 자동 입금 확인</li>
-          <li class="flex items-center gap-2.5"><i class="fa-solid fa-check text-accent-cyan text-xs"></i> 위변조 방지 QR 코드 영수증 발급</li>
-        </ul>
-      </div>
-      <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-800">
-        <span class="px-2.5 py-1 text-xs rounded-md bg-discord/15 text-discord font-semibold">Python</span>
-        <span class="px-2.5 py-1 text-xs rounded-md bg-amber-500/15 text-amber-400 font-semibold">결제 연동</span>
-        <span class="px-2.5 py-1 text-xs rounded-md bg-slate-800 text-slate-300 font-semibold">영수증 자동화</span>
-      </div>
+    <div class="glow-box bg-dark-card border border-accent-border rounded-2xl p-6">
+      <div class="text-amber-400 text-2xl mb-4"><i class="fa-solid fa-receipt"></i></div>
+      <h3 class="text-lg font-bold text-white mb-2">🚀 자동 결제 & 영수증 봇</h3>
+      <p class="text-slate-400 text-xs sm:text-sm mb-4">결제 정보 자동 확인 및 고해상도 영수증을 임베드로 즉시 발급합니다.</p>
+      <div class="text-xs text-amber-400 font-semibold">Python · 결제 자동화 · 영수증</div>
     </div>
-  </div>
-
-  <div class="mt-12 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 sm:p-5 flex items-start sm:items-center gap-3.5 text-amber-200 text-sm max-w-4xl mx-auto">
-    <i class="fa-solid fa-circle-info text-amber-400 text-lg mt-0.5 sm:mt-0"></i>
-    <div>이 외에도 <strong>다양한 봇 맞춤 제작</strong>이 가능합니다. 원하시는 기능을 편하게 문의해 주세요.</div>
-  </div>
-
-  <div class="mt-4 bg-red-500/10 border border-red-500/30 rounded-xl p-3.5 text-center text-red-300 text-xs sm:text-sm max-w-4xl mx-auto flex items-center justify-center gap-2">
-    <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
-    <span>본 포트폴리오의 디자인 및 기능 구성 무단 모방과 도용을 금지합니다.</span>
   </div>
 </section>
 
-<section id="pricing" class="py-16 sm:py-24 border-t border-accent-border/60 bg-slate-900/30">
+<!-- PRICING -->
+<section id="pricing" class="py-16 bg-slate-900/30 border-t border-accent-border">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="text-center max-w-3xl mx-auto mb-16">
-      <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-3">
-        서비스 <span class="text-discord">가격표</span>
-      </h2>
-      <p class="text-slate-400 text-base">합리적인 비용으로 안정적이고 최적화된 디스코드 봇을 구축해 드립니다.</p>
+    <div class="text-center max-w-3xl mx-auto mb-12">
+      <h2 class="text-3xl font-extrabold text-white mb-2">서비스 <span class="text-discord">가격표</span></h2>
+      <p class="text-slate-400 text-sm">2차 수정 및 맞춤형 기능 문의도 가능합니다.</p>
     </div>
-
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="bg-dark-card border border-accent-border rounded-2xl p-6 text-center hover:border-accent-cyan/60 transition-all flex flex-col justify-between">
+      <div class="bg-dark-card border border-accent-border rounded-2xl p-6 text-center flex flex-col justify-between">
         <div>
           <h3 class="text-slate-400 text-sm font-semibold mb-2">기본 소스 코드</h3>
-          <div class="text-3xl font-extrabold text-white mb-1">10,000<span class="text-base text-slate-400 font-normal">원</span></div>
-          <p class="text-xs text-slate-500 mb-6">최초 1회 납부</p>
-          <ul class="text-left text-xs sm:text-sm text-slate-300 space-y-3 mb-6">
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-cyan"></i> 기본 봇 뼈대 코드 제공</li>
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-cyan"></i> 슬래시 커맨드(Slash) 기본 세팅</li>
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-cyan"></i> 초기 세팅 가이드 지원</li>
-          </ul>
+          <div class="text-2xl font-extrabold text-white mb-4">10,000<span class="text-xs text-slate-400">원</span></div>
+          <p class="text-xs text-slate-400 mb-6">기본 봇 뼈대 코드 및 초기 세팅 가이드 제공</p>
         </div>
-        <button onclick="prefillInquiry('기본 소스 코드 제작')" class="w-full py-2.5 rounded-lg border border-accent-border hover:bg-discord hover:border-discord text-slate-200 hover:text-white font-medium text-sm transition-all">
-          신청 및 문의하기
-        </button>
+        <button onclick="handlePricingSelect('기본 소스 코드')" class="w-full py-2 rounded-lg border border-accent-border hover:bg-discord text-xs font-semibold">신청하기</button>
       </div>
-
-      <div class="bg-dark-card border border-accent-border rounded-2xl p-6 text-center hover:border-accent-cyan/60 transition-all flex flex-col justify-between">
+      <div class="bg-dark-card border border-accent-border rounded-2xl p-6 text-center flex flex-col justify-between">
         <div>
           <h3 class="text-slate-400 text-sm font-semibold mb-2">명령어 기능 추가</h3>
-          <div class="text-3xl font-extrabold text-white mb-1">5,000<span class="text-base text-slate-400 font-normal">원 ~</span></div>
-          <p class="text-xs text-slate-500 mb-6">기능 단위 청구</p>
-          <ul class="text-left text-xs sm:text-sm text-slate-300 space-y-3 mb-6">
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-cyan"></i> 원하는 맞춤 명령어 1개 추가</li>
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-cyan"></i> 기존 소스코드와 깔끔한 결합</li>
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-cyan"></i> 실시간 에러 테스트 완료</li>
-          </ul>
+          <div class="text-2xl font-extrabold text-white mb-4">5,000<span class="text-xs text-slate-400">원 ~</span></div>
+          <p class="text-xs text-slate-400 mb-6">원하는 맞춤 명령어 1개 추가 및 모듈 결합</p>
         </div>
-        <button onclick="prefillInquiry('명령어 기능 추가')" class="w-full py-2.5 rounded-lg border border-accent-border hover:bg-discord hover:border-discord text-slate-200 hover:text-white font-medium text-sm transition-all">
-          신청 및 문의하기
-        </button>
+        <button onclick="handlePricingSelect('명령어 기능 추가')" class="w-full py-2 rounded-lg border border-accent-border hover:bg-discord text-xs font-semibold">신청하기</button>
       </div>
-
-      <div class="bg-dark-card border border-discord/60 rounded-2xl p-6 text-center relative shadow-lg shadow-discord/10 hover:border-accent-cyan transition-all flex flex-col justify-between">
-        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-discord text-white text-[11px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider">
-          POPULAR
-        </div>
+      <div class="bg-dark-card border border-discord rounded-2xl p-6 text-center flex flex-col justify-between">
         <div>
-          <h3 class="text-slate-400 text-sm font-semibold mb-2">대리 호스팅 (24시간)</h3>
-          <div class="text-3xl font-extrabold text-white mb-1">3,000<span class="text-base text-slate-400 font-normal">원 / 월</span></div>
-          <p class="text-xs text-slate-500 mb-6">컴퓨터를 안 켜도 24시간 가동</p>
-          <ul class="text-left text-xs sm:text-sm text-slate-300 space-y-3 mb-6">
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-cyan"></i> 클라우드 서버 24/7 무중단 가동</li>
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-cyan"></i> 비정상 종료 시 자동 재부팅</li>
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-cyan"></i> 주기적인 서버 상태 점검</li>
-          </ul>
+          <h3 class="text-slate-400 text-sm font-semibold mb-2">대리 호스팅</h3>
+          <div class="text-2xl font-extrabold text-white mb-4">3,000<span class="text-xs text-slate-400">원 / 월</span></div>
+          <p class="text-xs text-slate-400 mb-6">컴퓨터를 끄셔도 클라우드에서 24시간 연속 구동</p>
         </div>
-        <button onclick="prefillInquiry('24시간 대리 호스팅')" class="w-full py-2.5 rounded-lg bg-discord hover:bg-discord-hover text-white font-semibold text-sm transition-all shadow-md shadow-discord/30">
-          신청 및 문의하기
-        </button>
+        <button onclick="handlePricingSelect('24시간 대리 호스팅')" class="w-full py-2 rounded-lg bg-discord hover:bg-discord-hover text-xs font-semibold">신청하기</button>
       </div>
-
-      <div class="bg-dark-card border border-accent-border rounded-2xl p-6 text-center hover:border-accent-cyan/60 transition-all flex flex-col justify-between">
+      <div class="bg-dark-card border border-accent-border rounded-2xl p-6 text-center flex flex-col justify-between">
         <div>
           <h3 class="text-slate-400 text-sm font-semibold mb-2">2차 수정 & 커스텀</h3>
-          <div class="text-3xl font-extrabold text-white mb-1">1,000<span class="text-base text-slate-400 font-normal">~ 5,000원</span></div>
-          <p class="text-xs text-slate-500 mb-6">난이도에 따라 유동적 조율</p>
-          <ul class="text-left text-xs sm:text-sm text-slate-300 space-y-3 mb-6">
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-cyan"></i> 문구/임베드 색상 변경</li>
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-cyan"></i> 버튼 인터랙션 추가</li>
-            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-accent-cyan"></i> 버그 디버깅 및 보수</li>
-          </ul>
+          <div class="text-2xl font-extrabold text-white mb-4">1,000<span class="text-xs text-slate-400">~ 5,000원</span></div>
+          <p class="text-xs text-slate-400 mb-6">문구/임베드 색상 변경, 버튼 인터랙션, 버그 수정</p>
         </div>
-        <button onclick="prefillInquiry('2차 수정 및 리팩토링')" class="w-full py-2.5 rounded-lg border border-accent-border hover:bg-discord hover:border-discord text-slate-200 hover:text-white font-medium text-sm transition-all">
-          신청 및 문의하기
-        </button>
+        <button onclick="handlePricingSelect('2차 수정')" class="w-full py-2 rounded-lg border border-accent-border hover:bg-discord text-xs font-semibold">신청하기</button>
       </div>
     </div>
   </div>
 </section>
 
-<section id="contact" class="py-16 sm:py-24 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-  <div class="bg-gradient-to-b from-dark-card to-[#101726] border border-accent-border rounded-3xl p-6 sm:p-12 text-center shadow-2xl relative">
+<!-- CONTACT SECTION -->
+<section id="contact" class="py-16 sm:py-24 max-w-4xl mx-auto px-4">
+  <div class="bg-gradient-to-b from-dark-card to-[#101726] border border-accent-border rounded-3xl p-6 sm:p-10 text-center shadow-2xl">
     
-    <div class="max-w-xl mx-auto mb-10">
-      <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-discord/20 text-discord text-2xl mb-4">
-        <i class="fa-solid fa-headset"></i>
-      </div>
-      <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-3">프로젝트를 시작해 보세요</h2>
-      <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
-        디스코드로 로그인하면 본인 계정과 연동되어 <strong>웹사이트에서 바로 문의를 접수</strong>하실 수 있습니다.<br>
-        개발자가 확인 후 디스코드 DM으로 직접 답변을 발송해 드립니다.
-      </p>
-    </div>
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-2">프로젝트 문의하기</h2>
+    <p class="text-slate-400 text-xs sm:text-sm mb-8">
+      디스코드로 로그인하면 웹사이트에서 바로 문의를 접수할 수 있으며, 개발자 채널로 즉시 전송됩니다.
+    </p>
 
-    <!-- MAIN FORM BOX -->
-    <div class="max-w-2xl mx-auto bg-dark-bg/80 border border-slate-700/70 rounded-2xl p-6 sm:p-8 text-left shadow-inner">
+    <div class="max-w-xl mx-auto bg-dark-bg/90 border border-slate-700/70 rounded-2xl p-6 text-left shadow-inner">
       
-      <!-- 1. NOT LOGGED IN STATE -->
+      <!-- 1. 비로그인 상태 박스 -->
       <div id="loginSection" class="text-center py-6">
-        <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 text-3xl mx-auto mb-4 border border-slate-700">
+        <div class="w-14 h-14 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 text-2xl mx-auto mb-3">
           <i class="fa-brands fa-discord text-discord"></i>
         </div>
-        <h3 class="text-xl font-bold text-white mb-2">디스코드 로그인이 필요합니다</h3>
-        <p class="text-slate-400 text-sm mb-6 max-w-md mx-auto">
-          신속한 본인 확인 및 답변 DM 발송을 위해 디스코드 계정 인증 후 문의 접수가 가능합니다.
-        </p>
-        
-        <div class="flex justify-center items-center">
-          <button onclick="discordLogin()" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-discord hover:bg-discord-hover text-white font-semibold text-sm flex items-center justify-center gap-2.5 transition-all shadow-md shadow-discord/20 active:scale-95">
-            <i class="fa-brands fa-discord text-lg"></i>
-            <span>디스코드로 로그인하기</span>
-          </button>
-        </div>
+        <h3 class="text-lg font-bold text-white mb-2">디스코드 로그인이 필요합니다</h3>
+        <p class="text-slate-400 text-xs mb-5">로그인 완료 후 이 화면에서 바로 문의를 작성하실 수 있습니다.</p>
+        <button onclick="discordLogin()" class="px-6 py-3 rounded-xl bg-discord hover:bg-discord-hover text-white font-semibold text-sm inline-flex items-center gap-2">
+          <i class="fa-brands fa-discord text-base"></i>
+          <span>디스코드로 로그인하기</span>
+        </button>
       </div>
 
-      <!-- 2. LOGGED IN STATE -->
+      <!-- 2. 로그인 완료 시 열리는 문의 폼 -->
       <div id="userSection" class="hidden">
-        <div class="flex items-center justify-between p-4 rounded-xl bg-slate-800/60 border border-slate-700 mb-6">
-          <div class="flex items-center gap-3.5">
-            <div class="relative">
-              <img id="userAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" class="w-12 h-12 rounded-full border-2 border-discord object-cover">
-              <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-dark-bg rounded-full"></span>
-            </div>
+        <div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-800/60 border border-slate-700 mb-5">
+          <div class="flex items-center gap-3">
+            <img id="formUserAvatar" src="" alt="avatar" class="w-10 h-10 rounded-full border border-discord object-cover">
             <div>
-              <div class="flex items-center gap-2">
-                <span id="userName" class="font-bold text-white text-base">로그인 유저</span>
-                <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-discord/20 text-discord border border-discord/30">DISCORD</span>
-              </div>
-              <span id="userTag" class="text-xs text-slate-400 font-mono">@username</span>
+              <div id="formUserName" class="font-bold text-white text-sm"></div>
+              <div id="formUserTag" class="text-xs text-slate-400 font-mono"></div>
             </div>
           </div>
-
-          <button onclick="logout()" class="text-xs text-slate-400 hover:text-red-400 px-3 py-1.5 rounded-lg border border-slate-700 hover:border-red-500/40 transition-colors flex items-center gap-1.5">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            <span>로그아웃</span>
-          </button>
+          <button onclick="logout()" class="text-xs text-slate-400 hover:text-red-400 px-2.5 py-1 rounded border border-slate-700">로그아웃</button>
         </div>
 
-        <!-- Inquiry Form -->
         <div class="space-y-4">
           <div>
-            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
-              문의 유형 <span class="text-red-400">*</span>
-            </label>
-            <select id="inquiryCategory" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-discord">
-              <option value="외주 신규 제작">🤖 신규 디스코드 봇 외주 제작</option>
+            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">문의 유형</label>
+            <select id="inquiryCategory" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-discord">
+              <option value="신규 디스코드 봇 외주">🤖 신규 디스코드 봇 외주 제작</option>
               <option value="1원 계좌인증 봇">🛡️ 1원 계좌인증 봇 연동</option>
               <option value="24시간 대리 호스팅">☁️ 24시간 호스팅 신청</option>
-              <option value="기능 추가 / 유지보수">🔧 기존 봇 2차 수정 / 기능 추가</option>
-              <option value="기타 제휴 / 문의">💬 기타 문의 및 견적 상담</option>
+              <option value="기능 추가 및 2차 수정">🔧 기존 봇 기능 추가 / 수정</option>
+              <option value="기타 문의">💬 기타 문의</option>
             </select>
           </div>
 
           <div>
-            <div class="flex justify-between items-center mb-2">
-              <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider">
-                문의 상세 내용 <span class="text-red-400">*</span>
-              </label>
-              <span id="charCount" class="text-xs text-slate-500">0 / 500자</span>
-            </div>
-            <textarea 
-              id="inquiryContent" 
-              rows="5" 
-              maxlength="500" 
-              oninput="updateCharCount()"
-              placeholder="제작을 원하시는 봇의 세부 기능, 희망 완료 일정, 예산 등을 편하게 남겨주시면 더욱 정확한 상담이 가능합니다."
-              class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-discord resize-none transition-colors"
-            ></textarea>
+            <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">문의 상세 내용</label>
+            <textarea id="inquiryContent" rows="4" placeholder="원하시는 봇의 기능, 예산, 일정 등을 적어주세요." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-discord resize-none"></textarea>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-bold text-slate-400 mb-1.5">희망 예산 (선택)</label>
-              <input type="text" id="inquiryBudget" placeholder="예: 3~5만원" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-discord">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-400 mb-1.5">답변 받을 보조 연락처 (선택)</label>
-              <input type="text" id="inquirySubContact" placeholder="텔레그램 ID 또는 오픈채팅 링크" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-discord">
-            </div>
-          </div>
-
-          <button 
-            id="submitBtn" 
-            onclick="submitInquiry()" 
-            class="w-full mt-2 py-3.5 rounded-xl bg-discord hover:bg-discord-hover text-white font-bold text-sm flex items-center justify-center gap-2.5 transition-all shadow-lg shadow-discord/30 active:scale-[0.99]"
-          >
+          <button id="submitBtn" onclick="submitInquiry()" class="w-full py-3 rounded-xl bg-discord hover:bg-discord-hover text-white font-bold text-sm flex items-center justify-center gap-2">
             <i class="fa-solid fa-paper-plane"></i>
-            <span>웹사이트에서 문의 접수하기</span>
+            <span>문의 보내기</span>
           </button>
 
-          <div id="statusMsg" class="hidden p-3.5 rounded-xl text-sm border mt-3 transition-all"></div>
-        </div>
-
-        <!-- History -->
-        <div id="inquiryHistoryBox" class="mt-6 pt-5 border-t border-slate-800">
-          <div class="flex items-center justify-between text-xs text-slate-400 mb-2 cursor-pointer" onclick="toggleHistory()">
-            <span class="font-semibold"><i class="fa-solid fa-clock-rotate-left mr-1"></i> 최근 내가 보낸 문의 내역 (<span id="historyCount">0</span>)</span>
-            <i id="historyToggleIcon" class="fa-solid fa-chevron-down text-[10px]"></i>
-          </div>
-          <div id="historyList" class="hidden space-y-2 mt-3 max-h-48 overflow-y-auto pr-1"></div>
+          <div id="statusMsg" class="hidden p-3 rounded-xl text-xs border text-center"></div>
         </div>
       </div>
+
     </div>
 
-    <!-- External Links -->
-    <div class="mt-8 flex flex-wrap justify-center gap-4">
-      <a href="https://discord.gg/8D7mtVGPyC" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded-xl bg-discord/20 hover:bg-discord text-slate-200 hover:text-white border border-discord/30 text-sm font-semibold flex items-center gap-2 transition-all">
-        <i class="fa-brands fa-discord text-base"></i>
-        <span>디스코드 공식 서버 바로가기</span>
+    <div class="mt-8 flex justify-center gap-4">
+      <a href="https://discord.gg/8D7mtVGPyC" target="_blank" class="px-4 py-2 rounded-xl bg-discord/20 hover:bg-discord text-slate-200 border border-discord/30 text-xs font-semibold flex items-center gap-2">
+        <i class="fa-brands fa-discord"></i> 공식 디스코드 서버
       </a>
-      <a href="https://t.me/rr777_p" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded-xl bg-telegram/20 hover:bg-telegram text-slate-200 hover:text-white border border-telegram/30 text-sm font-semibold flex items-center gap-2 transition-all">
-        <i class="fa-brands fa-telegram text-base"></i>
-        <span>텔레그램 1:1 상담 (@rr777_p)</span>
+      <a href="https://t.me/rr777_p" target="_blank" class="px-4 py-2 rounded-xl bg-telegram/20 hover:bg-telegram text-slate-200 border border-telegram/30 text-xs font-semibold flex items-center gap-2">
+        <i class="fa-brands fa-telegram"></i> 텔레그램 문의
       </a>
     </div>
 
   </div>
 </section>
 
-<section id="faq" class="py-16 max-w-4xl mx-auto px-4 sm:px-6">
-  <h2 class="text-2xl sm:text-3xl font-bold text-center text-white mb-10">자주 묻는 질문 (FAQ)</h2>
-  
-  <div class="space-y-4">
-    <div class="bg-dark-card border border-accent-border rounded-xl p-5">
-      <h3 class="font-bold text-white text-base mb-2 flex items-center gap-2">
-        <i class="fa-solid fa-circle-question text-accent-cyan"></i>
-        제작 소요 기간은 얼마나 걸리나요?
-      </h3>
-      <p class="text-slate-400 text-sm leading-relaxed">
-        기본 명령어 봇이나 영수증 봇은 보통 <strong>당일 ~ 2일 이내</strong> 납품됩니다. 외부 금융 API나 대규모 데이터베이스 연동이 필요한 봇은 기능 협의 후 3~5일 정도 소요됩니다.
-      </p>
-    </div>
-
-    <div class="bg-dark-card border border-accent-border rounded-xl p-5">
-      <h3 class="font-bold text-white text-base mb-2 flex items-center gap-2">
-        <i class="fa-solid fa-circle-question text-accent-cyan"></i>
-        호스팅 서비스를 꼭 같이 신청해야 하나요?
-      </h3>
-      <p class="text-slate-400 text-sm leading-relaxed">
-        아닙니다. 개인 PC나 VPS 서버가 있다면 직접 구동하실 수 있도록 세팅 가이드와 소스코드를 전달해 드립니다. 24시간 컴퓨터를 켜두기 곤란하신 분들을 위해 월 3,000원에 클라우드 대리 호스팅을 지원하고 있습니다.
-      </p>
-    </div>
-
-    <div class="bg-dark-card border border-accent-border rounded-xl p-5">
-      <h3 class="font-bold text-white text-base mb-2 flex items-center gap-2">
-        <i class="fa-solid fa-circle-question text-accent-cyan"></i>
-        납품 후 오류가 생기면 AS를 받을 수 있나요?
-      </h3>
-      <p class="text-slate-400 text-sm leading-relaxed">
-        납품일로부터 30일간 개발자의 코드로 인한 버그나 장애는 무상으로 즉시 수정해 드립니다.
-      </p>
-    </div>
-  </div>
-</section>
-
-<footer class="mt-auto py-8 border-t border-accent-border text-center text-slate-500 text-xs sm:text-sm">
-  <div class="max-w-7xl mx-auto px-4">
-    <p>&copy; 2026 DEV BOT. All rights reserved. Discord is a trademark of Discord Inc.</p>
-  </div>
+<footer class="mt-auto py-6 border-t border-accent-border text-center text-slate-500 text-xs">
+  &copy; 2026 DEV BOT. All rights reserved.
 </footer>
-
-<div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
 <script>
 let currentUser = null;
-const STORAGE_HISTORY_KEY = 'devbot_inquiry_history';
 
 document.addEventListener('DOMContentLoaded', () => {
-  initAuth();
-  loadInquiryHistory();
+  checkAuthSession();
 
-  // 로그인 성공 후 리다이렉트 처리 (?login=success)
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('login') === 'success') {
-    window.history.replaceState({}, document.title, window.location.pathname);
-    showToast('디스코드 로그인에 성공했습니다!', 'success');
-    handleContactNavClick();
+  // 로그인 성공 파라미터가 있을 때 스크롤 이동
+  if (window.location.search.includes('login=success')) {
+    history.replaceState({}, document.title, window.location.pathname);
+    setTimeout(() => {
+      document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+    }, 400);
   }
 });
 
-// 백엔드 세션 확인 (/api/me)
-async function initAuth() {
+// 세션 확인
+async function checkAuthSession() {
   try {
     const res = await fetch('/api/me', { credentials: 'include' });
     if (res.ok) {
       const data = await res.json();
       if (data && data.user) {
         currentUser = data.user;
-        renderUser(currentUser);
+        renderLoggedInUser(data.user);
       }
     }
   } catch (err) {
-    console.error('Session verify failed:', err);
+    console.error('인증 세션 오류:', err);
   }
 }
 
-// 실제 디스코드 OAuth 바로 이동
+// 로그인 이동
 function discordLogin() {
   window.location.href = '/api/auth/login';
 }
 
 // 로그아웃
 async function logout() {
-  currentUser = null;
-  try {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-  } catch (e) {}
-
-  document.getElementById('navAuthArea').innerHTML = `
-    <button onclick="discordLogin()" class="px-4 py-2 text-sm font-semibold rounded-lg bg-discord hover:bg-discord-hover text-white flex items-center gap-2 transition-all shadow-md shadow-discord/20 active:scale-95">
-      <i class="fa-brands fa-discord text-base"></i>
-      <span>로그인</span>
-    </button>
-  `;
-
-  document.getElementById('loginSection').classList.remove('hidden');
-  document.getElementById('userSection').classList.add('hidden');
-  showToast('로그아웃되었습니다.', 'info');
+  await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+  location.href = '/';
 }
 
-// 사용자 프로필 및 화면 렌더링
-function renderUser(user) {
+// UI 변경: 우측 상단 호버 로그아웃 & 문의 폼 열림
+function renderLoggedInUser(user) {
   const displayName = user.global_name || user.username || '사용자';
-  const tag = user.username ? `@${user.username}` : '';
   const avatarUrl = user.avatar
     ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
     : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
-  // 상단 네비바 우측 변경
+  // 1. 네비게이션: 프사 + 이름, 마우스 호버 시 오직 '로그아웃' 버튼만 노출
   const navAuthArea = document.getElementById('navAuthArea');
   navAuthArea.innerHTML = `
-    <div class="relative" id="userMenuDropdownParent">
-      <button onclick="toggleNavDropdown(event)" class="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slate-800/90 hover:bg-slate-700/80 border border-slate-700 transition-all active:scale-95">
+    <div class="relative profile-container py-2">
+      <div class="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 cursor-pointer">
         <img src="${avatarUrl}" alt="${displayName}" class="w-7 h-7 rounded-full object-cover border border-discord">
-        <span class="text-xs font-semibold text-white max-w-[100px] truncate hidden sm:inline">${displayName}</span>
-        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
-      </button>
+        <span class="text-xs font-semibold text-white max-w-[110px] truncate">${displayName}</span>
+      </div>
 
-      <div id="navDropdown" class="hidden absolute right-0 mt-2 w-48 rounded-xl bg-dark-card border border-accent-border shadow-2xl py-2 z-50 text-xs">
-        <div class="px-3 py-2 border-b border-slate-800">
-          <div class="font-bold text-white truncate">${displayName}</div>
-          <div class="text-slate-500 font-mono text-[11px] truncate">${tag}</div>
-        </div>
-        <a href="#contact" onclick="handleContactNavClick()" class="flex items-center gap-2 px-3 py-2 text-slate-300 hover:bg-slate-800 hover:text-discord">
-          <i class="fa-solid fa-paper-plane text-accent-cyan"></i>
-          <span>문의 작성하기</span>
-        </a>
-        <button onclick="logout()" class="w-full text-left flex items-center gap-2 px-3 py-2 text-red-400 hover:bg-red-500/10 transition-colors">
+      <!-- 마우스 올리면 나오는 로그아웃 버튼 -->
+      <div class="logout-dropdown hidden absolute right-0 top-full mt-1 w-32 rounded-xl bg-dark-card border border-accent-border shadow-xl p-1.5 z-50">
+        <button onclick="logout()" class="w-full text-center py-2 px-3 rounded-lg text-xs text-red-400 hover:bg-red-500/10 font-semibold transition-colors flex items-center justify-center gap-2">
           <i class="fa-solid fa-right-from-bracket"></i>
           <span>로그아웃</span>
         </button>
@@ -595,233 +315,88 @@ function renderUser(user) {
     </div>
   `;
 
-  // 문의 섹션 폼 활성화
+  // 2. 문의 폼: 입력 영역으로 전환
   document.getElementById('loginSection').classList.add('hidden');
   document.getElementById('userSection').classList.remove('hidden');
 
-  document.getElementById('userName').textContent = displayName;
-  document.getElementById('userTag').textContent = tag;
-  document.getElementById('userAvatar').src = avatarUrl;
+  document.getElementById('formUserName').textContent = displayName;
+  document.getElementById('formUserTag').textContent = '@' + user.username;
+  document.getElementById('formUserAvatar').src = avatarUrl;
 }
 
-function toggleNavDropdown(e) {
-  e.stopPropagation();
-  const dropdown = document.getElementById('navDropdown');
-  if (dropdown) dropdown.classList.toggle('hidden');
-}
-
-document.addEventListener('click', (e) => {
-  const dropdown = document.getElementById('navDropdown');
-  if (dropdown && !dropdown.contains(e.target)) {
-    dropdown.classList.add('hidden');
-  }
-});
-
-function handleContactNavClick() {
+// 네비나 히어로에서 '문의하기' 클릭 시 핸들러
+function handleInquiryClick() {
   const contact = document.getElementById('contact');
-  if (contact) {
-    contact.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  if (contact) contact.scrollIntoView({ behavior: 'smooth' });
 
   if (currentUser) {
     setTimeout(() => {
       const textarea = document.getElementById('inquiryContent');
       if (textarea) textarea.focus();
-    }, 600);
+    }, 500);
   } else {
+    // 비로그인이면 로그인 유도
     setTimeout(() => {
       discordLogin();
-    }, 300);
+    }, 400);
   }
 }
 
-function prefillInquiry(serviceTitle) {
+// 가격표에서 선택 시
+function handlePricingSelect(title) {
   if (!currentUser) {
     discordLogin();
     return;
   }
-  handleContactNavClick();
-  const categorySelect = document.getElementById('inquiryCategory');
+  handleInquiryClick();
   const textarea = document.getElementById('inquiryContent');
-  
-  if (serviceTitle.includes('기본 소스')) categorySelect.value = '외주 신규 제작';
-  else if (serviceTitle.includes('호스팅')) categorySelect.value = '24시간 대리 호스팅';
-  else if (serviceTitle.includes('수정')) categorySelect.value = '기능 추가 / 유지보수';
-  else categorySelect.value = '외주 신규 제작';
-
-  textarea.value = `[${serviceTitle}] 관련 문의드립니다.\n- 구체적인 희망 사항: `;
-  updateCharCount();
-  textarea.focus();
+  if (textarea) {
+    textarea.value = `[${title} 신청]\n내용: `;
+    textarea.focus();
+  }
 }
 
-function updateCharCount() {
-  const textarea = document.getElementById('inquiryContent');
-  const countSpan = document.getElementById('charCount');
-  countSpan.textContent = `${textarea.value.length} / 500자`;
-}
-
-// 실제 /api/inquiry 전송
+// 문의 전송 (/api/inquiry)
 async function submitInquiry() {
-  if (!currentUser) {
-    showToast('로그인 후 이용하실 수 있습니다.', 'error');
-    discordLogin();
-    return;
-  }
-
   const content = document.getElementById('inquiryContent').value.trim();
   const category = document.getElementById('inquiryCategory').value;
-  const budget = document.getElementById('inquiryBudget').value.trim();
-  const subContact = document.getElementById('inquirySubContact').value.trim();
+  const statusMsg = document.getElementById('statusMsg');
   const submitBtn = document.getElementById('submitBtn');
 
   if (!content) {
-    showStatusMsg('문의 내용을 입력해 주세요.', 'error');
+    statusMsg.className = 'p-3 rounded-xl text-xs border text-center block bg-red-500/10 border-red-500/30 text-red-300';
+    statusMsg.textContent = '문의 내용을 입력해 주세요.';
     return;
   }
 
   submitBtn.disabled = true;
-  submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>전송 중...</span>`;
-  showStatusMsg('문의를 접수하고 디스코드로 알림을 전송 중입니다...', 'info');
-
-  const payload = {
-    category,
-    content,
-    budget: budget || '협의/미정',
-    subContact: subContact || '디스코드 DM'
-  };
+  submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> 전송 중...`;
 
   try {
     const res = await fetch('/api/inquiry', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ category, content })
     });
 
     const data = await res.json();
 
     if (res.ok) {
-      showStatusMsg('✅ 문의가 성공적으로 접수되었습니다! 빠른 시일 내에 디스코드 DM으로 답변드리겠습니다.', 'success');
-      showToast('문의가 정상 접수되었습니다.', 'success');
-
-      saveInquiryHistory({
-        category,
-        content,
-        date: new Date().toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-      });
-
+      statusMsg.className = 'p-3 rounded-xl text-xs border text-center block bg-emerald-500/10 border-emerald-500/30 text-emerald-300';
+      statusMsg.textContent = '✅ 문의가 성공적으로 전송되었습니다! 디스코드 채널로 알림이 전달되었습니다.';
       document.getElementById('inquiryContent').value = '';
-      document.getElementById('inquiryBudget').value = '';
-      document.getElementById('inquirySubContact').value = '';
-      updateCharCount();
     } else {
-      showStatusMsg('❌ ' + (data.error || '접수에 실패했습니다.'), 'error');
-      showToast(data.error || '접수 실패', 'error');
+      statusMsg.className = 'p-3 rounded-xl text-xs border text-center block bg-red-500/10 border-red-500/30 text-red-300';
+      statusMsg.textContent = '❌ ' + (data.error || '전송 실패');
     }
   } catch (err) {
-    showStatusMsg('네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.', 'error');
+    statusMsg.className = 'p-3 rounded-xl text-xs border text-center block bg-red-500/10 border-red-500/30 text-red-300';
+    statusMsg.textContent = '❌ 통신 중 오류가 발생했습니다.';
   } finally {
     submitBtn.disabled = false;
-    submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>웹사이트에서 문의 접수하기</span>`;
+    submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>문의 보내기</span>`;
   }
-}
-
-function showStatusMsg(msg, type) {
-  const el = document.getElementById('statusMsg');
-  el.classList.remove('hidden', 'bg-red-500/10', 'border-red-500/30', 'text-red-300', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-300', 'bg-slate-800', 'text-slate-300');
-
-  if (type === 'error') {
-    el.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-300');
-  } else if (type === 'success') {
-    el.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-300');
-  } else {
-    el.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700');
-  }
-  el.textContent = msg;
-}
-
-function saveInquiryHistory(item) {
-  let list = JSON.parse(localStorage.getItem(STORAGE_HISTORY_KEY) || '[]');
-  list.unshift(item);
-  if (list.length > 10) list = list.slice(0, 10);
-  localStorage.setItem(STORAGE_HISTORY_KEY, JSON.stringify(list));
-  loadInquiryHistory();
-}
-
-function loadInquiryHistory() {
-  const list = JSON.parse(localStorage.getItem(STORAGE_HISTORY_KEY) || '[]');
-  const countEl = document.getElementById('historyCount');
-  const container = document.getElementById('historyList');
-  if (countEl) countEl.textContent = list.length;
-  if (!container) return;
-
-  if (list.length === 0) {
-    container.innerHTML = `<p class="text-[11px] text-slate-500 py-1">접수된 문의 내역이 없습니다.</p>`;
-    return;
-  }
-
-  container.innerHTML = list.map(item => `
-    <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-xs">
-      <div class="flex justify-between items-center text-slate-400 mb-1">
-        <span class="font-semibold text-accent-cyan">${escapeHtml(item.category)}</span>
-        <span class="text-[10px]">${item.date}</span>
-      </div>
-      <div class="text-slate-300 line-clamp-2">${escapeHtml(item.content)}</div>
-    </div>
-  `).join('');
-}
-
-function toggleHistory() {
-  const list = document.getElementById('historyList');
-  const icon = document.getElementById('historyToggleIcon');
-  if (list.classList.contains('hidden')) {
-    list.classList.remove('hidden');
-    icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
-  } else {
-    list.classList.add('hidden');
-    icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
-  }
-}
-
-function showToast(text, type = 'info') {
-  const container = document.getElementById('toastContainer');
-  const toast = document.createElement('div');
-  toast.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 text-xs sm:text-sm font-medium transition-all transform duration-300 translate-y-3 opacity-0 border ${
-    type === 'success' 
-      ? 'bg-slate-900 text-emerald-400 border-emerald-500/40' 
-      : type === 'error'
-      ? 'bg-slate-900 text-red-400 border-red-500/40'
-      : 'bg-slate-900 text-slate-200 border-slate-700'
-  }`;
-
-  const iconClass = type === 'success' ? 'fa-solid fa-circle-check text-emerald-400' : type === 'error' ? 'fa-solid fa-circle-exclamation text-red-400' : 'fa-solid fa-circle-info text-cyan-400';
-  toast.innerHTML = `<i class="${iconClass}"></i><span>${escapeHtml(text)}</span>`;
-
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.classList.remove('translate-y-3', 'opacity-0');
-  }, 50);
-
-  setTimeout(() => {
-    toast.classList.add('opacity-0', 'translate-y-3');
-    setTimeout(() => toast.remove(), 300);
-  }, 4000);
-}
-
-function toggleMobileMenu() {
-  const menu = document.getElementById('mobileMenu');
-  menu.classList.toggle('hidden');
-}
-
-function escapeHtml(str) {
-  if (!str) return '';
-  return str.replace(/[&<>"']/g, m => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  })[m]);
 }
 </script>
 
