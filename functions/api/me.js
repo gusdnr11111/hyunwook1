@@ -10,8 +10,7 @@ export async function onRequestGet({ request }) {
       });
     }
 
-    const rawData = decodeURIComponent(escape(atob(match[1])));
-    const user = JSON.parse(rawData);
+    const user = JSON.parse(decodeURIComponent(match[1]));
 
     return new Response(JSON.stringify({ user }), {
       status: 200,
