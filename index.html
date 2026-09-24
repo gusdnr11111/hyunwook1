@@ -8,19 +8,19 @@
 <!-- 파비콘 (브라우저 탭 아이콘) -->
 <link rel="icon" type="image/gif" href="https://ddev.my/DEV.gif">
 
-<!-- Open Graph / 디스코드 & SNS 링크 전송 시 로고 및 미리보기 카드 설정 -->
+<!-- Open Graph / 디스코드 & SNS 링크 전송 시 배너 미리보기 카드 설정 -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ddev.my/">
 <meta property="og:title" content="DEV BOT | 디스코드 봇 전문 개발자">
 <meta property="og:description" content="디스코드봇을 혁신으로, 고퀄리티의 외주를 만나보세요. 서버 백업 봇부터 개인 외주까지 제작합니다.">
-<meta property="og:image" content="https://ddev.my/DEV.gif">
+<meta property="og:image" content="https://ddev.my/DEV_2.gif">
 <meta name="theme-color" content="#5865F2">
 
-<!-- Twitter Cards -->
+<!-- Twitter Cards (와이드 배너 전송) -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="DEV BOT | 디스코드 봇 전문 개발자">
 <meta name="twitter:description" content="디스코드봇을 혁신으로, 고퀄리티의 외주를 만나보세요.">
-<meta name="twitter:image" content="https://ddev.my/DEV.gif">
+<meta name="twitter:image" content="https://ddev.my/DEV_2.gif">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -112,7 +112,7 @@
 </nav>
 
 <!-- HERO -->
-<header class="relative pt-36 pb-20 md:pt-44 md:pb-28 px-4 text-center flex flex-col items-center justify-center">
+<header class="relative pt-36 pb-16 md:pt-44 md:pb-24 px-4 text-center flex flex-col items-center justify-center">
   <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/40 bg-cyan-950/30 text-cyan-400 text-xs sm:text-sm font-semibold tracking-wide mb-6 shadow-sm shadow-cyan-500/10">
     <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
     PYTHON · 24/7 DISCORD BOT DEVELOPER
@@ -125,10 +125,22 @@
     디스코드봇을 혁신으로, 고퀄리티의 외주를 만나보세요
   </p>
   
-  <p class="max-w-2xl text-slate-400 text-base sm:text-lg mb-9 leading-relaxed font-normal">
+  <p class="max-w-2xl text-slate-400 text-base sm:text-lg mb-8 leading-relaxed font-normal">
     서버 활동을 안전하고 편리하게 관리할 수 있도록 지원합니다.<br class="hidden sm:inline">
     <strong class="text-slate-200 font-semibold">1원 계좌 인증 봇 API</strong>부터 <strong class="text-slate-200 font-semibold">서버 실시간 백업 봇</strong>까지, 모든 봇을 <strong class="text-emerald-400 font-semibold">Python (discord.py)</strong>으로 맞춤 제작해 드립니다.
   </p>
+
+  <!-- DEV_2.gif 공식 메인 와이드 배너 삽입 -->
+  <div class="w-full max-w-2xl mb-10 px-2">
+    <div class="card-glow rounded-2xl overflow-hidden p-1.5 border border-slate-700/60 shadow-2xl">
+      <img 
+        src="/DEV_2.gif" 
+        alt="DEV BOT 배너" 
+        class="w-full h-auto rounded-xl object-cover"
+        onerror="this.onerror=null; this.src='DEV_2.gif';"
+      >
+    </div>
+  </div>
 
   <div class="flex flex-wrap items-center justify-center gap-4 w-full max-w-md">
     <a href="#contact" class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-discord hover:bg-discord-hover text-white font-semibold text-base flex items-center justify-center gap-2 shadow-lg shadow-discord/30 transition-all hover:-translate-y-0.5">
