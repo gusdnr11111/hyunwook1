@@ -11,28 +11,46 @@
   body { background: #070b13; color: #f8fafc; font-family: 'Inter', 'Noto Sans KR', sans-serif; }
 </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-<!-- DISCORD OAUTH LOGIN MODAL -->
-<div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
-  <div class="bg-[#0e1526] border border-slate-800 rounded-2xl max-w-sm w-full p-8 shadow-2xl text-center">
-    <div class="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mx-auto mb-4 text-indigo-400 text-2xl">
-      <i class="fa-solid fa-shield-halved"></i>
-    </div>
-    <h2 class="text-xl font-bold text-white mb-1.5">DEV BOT 관리자 인증</h2>
-    <p class="text-xs text-slate-400 mb-6">등록된 디스코드 관리자 계정으로 로그인해 주세요.</p>
+<!-- 1. 로그인 대기 화면 -->
+<div id="loginModal" class="bg-[#0e1526] border border-slate-800 rounded-2xl max-w-sm w-full p-8 shadow-2xl text-center">
+  <div class="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mx-auto mb-4 text-indigo-400 text-2xl">
+    <i class="fa-solid fa-shield-halved"></i>
+  </div>
+  <h2 class="text-xl font-bold text-white mb-2">DEV BOT 관리자 인증</h2>
+  <p class="text-xs text-slate-400 mb-6">등록된 디스코드 관리자 계정으로 로그인해 주세요.</p>
 
-    <div id="authStatusMessage" class="hidden mb-4 p-3 rounded-xl text-xs border"></div>
+  <button onclick="loginWithDiscord()" class="w-full py-3 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all cursor-pointer">
+    <i class="fa-brands fa-discord text-base"></i>
+    <span>디스코드로 관리자 로그인</span>
+  </button>
+  <a href="/" class="block mt-4 text-xs text-slate-500 hover:text-slate-300">홈으로 돌아가기</a>
+</div>
 
-    <button onclick="loginWithDiscord()" class="w-full py-3 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all cursor-pointer">
-      <i class="fa-brands fa-discord text-base"></i>
-      <span>디스코드로 관리자 로그인</span>
+<!-- 2. 권한 없음 전용 모달 (비인가 유저 접속 시) -->
+<div id="noAuthModal" class="hidden bg-[#0e1526] border border-red-500/40 rounded-2xl max-w-md w-full p-8 shadow-2xl text-center">
+  <div class="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto mb-4 text-red-400 text-3xl">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+  </div>
+  <h2 class="text-xl font-extrabold text-white mb-2">당신은 어드민 권한이 없습니다</h2>
+  <p id="noAuthUserDetail" class="text-xs text-slate-400 mb-6 leading-relaxed">
+    접속하신 계정은 관리자 목록에 등록되어 있지 않습니다.
+  </p>
+
+  <div class="space-y-3">
+    <a href="/" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all">
+      <i class="fa-solid fa-house"></i>
+      <span>웹사이트 바로가기</span>
+    </a>
+    <button onclick="adminLogout()" class="w-full py-2.5 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-400 text-xs transition-all cursor-pointer">
+      다른 계정으로 로그인
     </button>
   </div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboardArea" class="hidden flex-1 flex flex-col">
+<!-- 3. 권한 승인 시 오픈되는 대시보드 화면 -->
+<div id="dashboardArea" class="hidden fixed inset-0 bg-[#070b13] flex flex-col overflow-y-auto">
   <header class="border-b border-slate-800 bg-[#0e1526] px-6 py-4 flex items-center justify-between sticky top-0 z-40">
     <div class="flex items-center gap-3">
       <span class="px-2.5 py-1 rounded bg-indigo-500/20 text-indigo-400 text-xs font-bold">DEV BOT ADMIN</span>
@@ -84,7 +102,6 @@
 </div>
 
 <script>
-// XSS 및 HTML 인젝션 방어용 문자 치환
 function escapeHtml(str) {
   if (!str) return '';
   return String(str)
@@ -95,15 +112,6 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-function showAuthMsg(msg, isError = true) {
-  const box = document.getElementById('authStatusMessage');
-  box.className = `mb-4 p-3 rounded-xl text-xs border block ${
-    isError ? 'bg-red-500/10 border-red-500/30 text-red-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-  }`;
-  box.textContent = msg;
-}
-
-// 디스코드 OAuth 로그인 시작 (state=admin 전달)
 function loginWithDiscord() {
   window.location.href = '/api/auth/login?state=admin';
 }
@@ -118,13 +126,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const tokenPayload = urlParams.get('tk');
 
-  // 디스코드 콜백에서 유저 정보 토큰을 가지고 /admin으로 돌아온 경우
   if (tokenPayload) {
     try {
       const user = JSON.parse(decodeURIComponent(escape(atob(tokenPayload))));
       window.history.replaceState({}, document.title, window.location.pathname);
 
-      // 서버에 관리자 권한 확인 요청
       const res = await fetch('/api/admin?action=auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -137,24 +143,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         sessionStorage.setItem('admin_user_name', user.global_name || user.username);
         openDashboard();
       } else {
-        showAuthMsg(data.error || '접근이 거부되었습니다.');
+        showNoAuthUI(user);
       }
       return;
     } catch (e) {
-      showAuthMsg('인증 처리 중 오류가 발생했습니다.');
+      showNoAuthUI(null);
       return;
     }
   }
 
-  // 이미 세션 토큰이 보관되어 있는 경우 바로 오픈
   if (sessionStorage.getItem('admin_jwt_token')) {
     openDashboard();
   }
 });
 
+function showNoAuthUI(user) {
+  document.getElementById('loginModal').classList.add('hidden');
+  document.getElementById('dashboardArea').classList.add('hidden');
+  document.getElementById('noAuthModal').classList.remove('hidden');
+
+  if (user) {
+    document.getElementById('noAuthUserDetail').innerHTML = `
+      현재 로그인된 계정: <strong>${escapeHtml(user.global_name \vert{}\vert{} user.username)}</strong> (@${escapeHtml(user.username)})<br>
+      해당 디스코드 계정은 관리자 권한이 없습니다.
+    `;
+  }
+}
+
 function openDashboard() {
   document.getElementById('loginModal').classList.add('hidden');
+  document.getElementById('noAuthModal').classList.add('hidden');
   document.getElementById('dashboardArea').classList.remove('hidden');
+
   const name = sessionStorage.getItem('admin_user_name');
   if (name) {
     document.getElementById('adminProfileName').innerHTML = `<i class="fa-solid fa-user-check text-emerald-400"></i> <span>${escapeHtml(name)}</span>`;
@@ -176,7 +196,7 @@ async function loadData() {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
-    if (res.status === 401) {
+    if (res.status === 401 || res.status === 403) {
       alert('관리자 인증 세션이 만료되었습니다.');
       adminLogout();
       return;
@@ -193,14 +213,13 @@ async function loadData() {
       return;
     }
 
-    // HTML 인젝션(XSS) 방지를 위해 escapeHtml 처리
     container.innerHTML = list.map(item => `
       <div class="bg-[#070b13] border border-slate-800 rounded-xl p-5 space-y-3">
         <div class="flex items-center justify-between text-xs border-b border-slate-800/80 pb-2.5">
           <div class="flex items-center gap-2">
             <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-bold">${escapeHtml(item.category)}</span>
             <span class="font-bold text-white text-sm">${escapeHtml(item.global_name || item.username)}</span>
-            <span class="text-slate-500 font-mono">(@${escapeHtml(item.username)} / ID: ${escapeHtml(item.user_id)})</span>
+            <span class="text-slate-500 font-mono">(@${escapeHtml(item.username)} / ID:${escapeHtml(item.user_id)})</span>
           </div>
           <span class="text-slate-500">${escapeHtml(item.created_at || '')}</span>
         </div>
