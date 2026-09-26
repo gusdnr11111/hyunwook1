@@ -1,4 +1,3 @@
-// HMAC-SHA256 기반 관리자 세션 토큰 서명
 async function signAdminToken(secret, payload) {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -10,7 +9,6 @@ async function signAdminToken(secret, payload) {
   return btoa(data) + '.' + sigHex;
 }
 
-// 토큰 유효성 및 권한 검증
 async function verifyAdminToken(secret, token) {
   try {
     const [b64Data, sigHex] = token.split('.');
@@ -37,26 +35,24 @@ export async function onRequest({ request, env }) {
   const action = url.searchParams.get('action');
   const secretKey = env.ADMIN_SECRET || 'devbot_admin_jwt_secret_token_key_2026';
 
-  // 허용할 관리자 디스코드 ID 목록 (환경변수 또는 하드코딩 기본값)
-  const allowedAdminIds = (env.ADMIN_USER_IDS || '1016643420804087880')
+  // 허용할 관리자 디스코드 ID 목록
+  const allowedAdminIds = (env.ADMIN_USER_IDS || '1520345082581090374')
     .split(',')
     .map(id => id.trim());
 
-  // 1. 디스코드 계정 기반 관리자 인증 (Auth Exchange)
+  // 1. 디스코드 계정 기반 관리자 검증
   if (action === 'auth' && request.method === 'POST') {
     try {
       const { user } = await request.json();
 
       if (!user || !user.id) {
-        return new Response(JSON.stringify({ error: '디스코드 사용자 정보가 없습니다.' }), { status: 400 });
+        return new Response(JSON.stringify({ error: '사용자 정보가 없습니다.' }), { status: 400 });
       }
 
-      // 허용된 디스코드 유저 ID인지 서버단에서 엄격 검증
       if (!allowedAdminIds.includes(String(user.id))) {
         return new Response(JSON.stringify({ error: '관리자 권한이 부여되지 않은 계정입니다.' }), { status: 403 });
       }
 
-      // 12시간 유효 관리자 토큰 발급
       const token = await signAdminToken(secretKey, {
         admin: true,
         userId: user.id,
@@ -73,7 +69,7 @@ export async function onRequest({ request, env }) {
     }
   }
 
-  // 이후 stats, reply 요청은 발급된 관리자 토큰 필수 검증
+  // 이후 작업은 관리자 토큰 검증 필수
   const authHeader = request.headers.get('Authorization') || '';
   const token = authHeader.replace(/^Bearer\s+/i, '');
   const verified = await verifyAdminToken(secretKey, token);
@@ -85,7 +81,7 @@ export async function onRequest({ request, env }) {
     });
   }
 
-  // 2. 대시보드 통계 및 문의 목록 조회
+  // 2. 문의 내역 및 통계 조회
   if (action === 'stats') {
     try {
       if (!env.DB) {
@@ -114,7 +110,7 @@ export async function onRequest({ request, env }) {
     }
   }
 
-  // 3. 디스코드 유저에게 ## 마크다운 강조 DM 답변 발송
+  // 3. DM 발송 (## 마크다운 적용)
   if (action === 'reply' && request.method === 'POST') {
     try {
       const { inquiryId, userId, reply } = await request.json();
