@@ -1,18 +1,26 @@
-export async function onRequest(context) {
-  // context.env를 통해 환경 변수에 접근
-  const clientId = context.env.DISCORD_CLIENT_ID;
-  const redirectUri = context.env.DISCORD_REDIRECT_URI;
+export async function onRequestGet({ request, env }) {
+  const url = new URL(request.url);
+  const state = url.searchParams.get('state') || '';
 
-  // 디버깅용 로그 (배포 로그에서 확인 가능)
-  console.log("Client ID:", clientId);
-  console.log("Redirect URI:", redirectUri);
+  const clientId = env.DISCORD_CLIENT_ID ? env.DISCORD_CLIENT_ID.trim() : '';
+  const redirectUri = env.DISCORD_REDIRECT_URI 
+    ? env.DISCORD_REDIRECT_URI.trim() 
+    : 'https://ddev.my/api/auth/callback';
 
-  const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    response_type: 'code',
-    scope: 'identify'
-  });
+  if (!clientId) {
+    return new Response('DISCORD_CLIENT_ID가 환경변수에 설정되어 있지 않습니다.', { status: 500 });
+  }
 
-  return Response.redirect(`https://discord.com/api/oauth2/authorize?${params}`, 302);
+  // 디스코드 권한 요청 URL 생성
+  const discordAuthUrl = new URL('https://discord.com/api/oauth2/authorize');
+  discordAuthUrl.searchParams.set('client_id', clientId);
+  discordAuthUrl.searchParams.set('redirect_uri', redirectUri);
+  discordAuthUrl.searchParams.set('response_type', 'code');
+  discordAuthUrl.searchParams.set('scope', 'identify');
+  discordAuthUrl.searchParams.set('prompt', 'consent');
+  if (state) {
+    discordAuthUrl.searchParams.set('state', state);
+  }
+
+  return Response.redirect(discordAuthUrl.toString(), 302);
 }
