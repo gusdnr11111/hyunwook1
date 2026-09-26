@@ -36,7 +36,7 @@ export async function onRequest({ request, env }) {
   const secretKey = env.ADMIN_SECRET || 'devbot_admin_jwt_secret_token_key_2026';
 
   // 허용할 관리자 디스코드 ID 목록
-  const allowedAdminIds = (env.ADMIN_USER_IDS || '1520345082581090374')
+  const allowedAdminIds = (env.ADMIN_USER_IDS || '1016643420804087880')
     .split(',')
     .map(id => id.trim());
 
