@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DEV BOT 관리자 대시보드</title>
+<link rel="icon" type="image/gif" href="https://ddev.my/DEV.gif">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -11,25 +12,26 @@
   body { background: #070b13; color: #f8fafc; font-family: 'Inter', 'Noto Sans KR', sans-serif; }
 </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="min-h-screen flex flex-col items-center justify-center p-4 relative">
 
 <!-- 1. 로그인 대기 화면 -->
-<div id="loginModal" class="bg-[#0e1526] border border-slate-800 rounded-2xl max-w-sm w-full p-8 shadow-2xl text-center">
+<div id="loginModal" class="bg-[#0e1526] border border-slate-800 rounded-2xl max-w-sm w-full p-8 shadow-2xl text-center z-50">
   <div class="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mx-auto mb-4 text-indigo-400 text-2xl">
     <i class="fa-solid fa-shield-halved"></i>
   </div>
   <h2 class="text-xl font-bold text-white mb-2">DEV BOT 관리자 인증</h2>
   <p class="text-xs text-slate-400 mb-6">등록된 디스코드 관리자 계정으로 로그인해 주세요.</p>
 
-  <button onclick="loginWithDiscord()" class="w-full py-3 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all cursor-pointer">
+  <!-- a 태그 직접 이동 방식으로 변경하여 클릭 씹힘 100% 방지 -->
+  <a href="/api/auth/login?state=admin" id="btnAdminLogin" class="w-full py-3.5 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all cursor-pointer">
     <i class="fa-brands fa-discord text-base"></i>
     <span>디스코드로 관리자 로그인</span>
-  </button>
+  </a>
   <a href="/" class="block mt-4 text-xs text-slate-500 hover:text-slate-300">홈으로 돌아가기</a>
 </div>
 
 <!-- 2. 권한 없음 전용 모달 (비인가 유저 접속 시) -->
-<div id="noAuthModal" class="hidden bg-[#0e1526] border border-red-500/40 rounded-2xl max-w-md w-full p-8 shadow-2xl text-center">
+<div id="noAuthModal" class="hidden bg-[#0e1526] border border-red-500/40 rounded-2xl max-w-md w-full p-8 shadow-2xl text-center z-50">
   <div class="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto mb-4 text-red-400 text-3xl">
     <i class="fa-solid fa-triangle-exclamation"></i>
   </div>
@@ -50,7 +52,7 @@
 </div>
 
 <!-- 3. 권한 승인 시 오픈되는 대시보드 화면 -->
-<div id="dashboardArea" class="hidden fixed inset-0 bg-[#070b13] flex flex-col overflow-y-auto">
+<div id="dashboardArea" class="hidden fixed inset-0 bg-[#070b13] flex flex-col overflow-y-auto z-40">
   <header class="border-b border-slate-800 bg-[#0e1526] px-6 py-4 flex items-center justify-between sticky top-0 z-40">
     <div class="flex items-center gap-3">
       <span class="px-2.5 py-1 rounded bg-indigo-500/20 text-indigo-400 text-xs font-bold">DEV BOT ADMIN</span>
@@ -112,12 +114,9 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-function loginWithDiscord() {
-  window.location.href = '/api/auth/login?state=admin';
-}
-
 function adminLogout() {
   sessionStorage.removeItem('admin_jwt_token');
+  sessionStorage.removeItem('admin_user_name');
   localStorage.removeItem('devbot_user_session');
   location.replace('/admin');
 }
@@ -131,6 +130,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const user = JSON.parse(decodeURIComponent(escape(atob(tokenPayload))));
       window.history.replaceState({}, document.title, window.location.pathname);
 
+      // 서버에 관리자 권한 확인 요청
       const res = await fetch('/api/admin?action=auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -152,6 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // 기존 저장된 세션 검증
   if (sessionStorage.getItem('admin_jwt_token')) {
     openDashboard();
   }
@@ -164,7 +165,7 @@ function showNoAuthUI(user) {
 
   if (user) {
     document.getElementById('noAuthUserDetail').innerHTML = `
-      현재 로그인된 계정: <strong>${escapeHtml(user.global_name \vert{}\vert{} user.username)}</strong> (@${escapeHtml(user.username)})<br>
+      현재 로그인 계정: <strong>${escapeHtml(user.global_name || user.username)}</strong> (@${escapeHtml(user.username)})<br>
       해당 디스코드 계정은 관리자 권한이 없습니다.
     `;
   }
@@ -197,7 +198,7 @@ async function loadData() {
     });
 
     if (res.status === 401 || res.status === 403) {
-      alert('관리자 인증 세션이 만료되었습니다.');
+      alert('관리자 세션이 만료되었습니다. 다시 로그인해 주세요.');
       adminLogout();
       return;
     }
@@ -219,7 +220,7 @@ async function loadData() {
           <div class="flex items-center gap-2">
             <span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-bold">${escapeHtml(item.category)}</span>
             <span class="font-bold text-white text-sm">${escapeHtml(item.global_name || item.username)}</span>
-            <span class="text-slate-500 font-mono">(@${escapeHtml(item.username)} / ID:${escapeHtml(item.user_id)})</span>
+            <span class="text-slate-500 font-mono">(@${escapeHtml(item.username)} / ID: ${escapeHtml(item.user_id)})</span>
           </div>
           <span class="text-slate-500">${escapeHtml(item.created_at || '')}</span>
         </div>
